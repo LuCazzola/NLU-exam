@@ -1,0 +1,1 @@
+{"train perplexity": 605.6524953636504, "train loss": 6.406306381595742, "_timestamp": 1722263843.3664916, "eval perplexity": 593.9654366488337, "eval loss": 6.386821130209813, "_runtime": 1031.4593696594238, "_step": 99, "_wandb": {"runtime": 1031}}
