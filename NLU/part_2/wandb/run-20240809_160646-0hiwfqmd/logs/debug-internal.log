@@ -1,0 +1,186 @@
+2024-08-09 16:06:46,577 INFO    StreamThr :4958 [internal.py:wandb_internal():85] W&B internal server running at pid: 4958, started at: 2024-08-09 16:06:46.576932
+2024-08-09 16:06:46,578 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: status
+2024-08-09 16:06:46,578 INFO    WriterThread:4958 [datastore.py:open_for_write():87] open: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/run-0hiwfqmd.wandb
+2024-08-09 16:06:46,580 DEBUG   SenderThread:4958 [sender.py:send():379] send: header
+2024-08-09 16:06:46,580 DEBUG   SenderThread:4958 [sender.py:send():379] send: run
+2024-08-09 16:06:46,782 INFO    SenderThread:4958 [dir_watcher.py:__init__():211] watching files in: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files
+2024-08-09 16:06:46,782 INFO    SenderThread:4958 [sender.py:_start_run_threads():1188] run started: 0hiwfqmd with start time 1723219606.577306
+2024-08-09 16:06:46,788 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: check_version
+2024-08-09 16:06:46,788 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: check_version
+2024-08-09 16:06:46,863 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: run_start
+2024-08-09 16:06:46,890 DEBUG   HandlerThread:4958 [system_info.py:__init__():26] System info init
+2024-08-09 16:06:46,890 DEBUG   HandlerThread:4958 [system_info.py:__init__():41] System info init done
+2024-08-09 16:06:46,890 INFO    HandlerThread:4958 [system_monitor.py:start():194] Starting system monitor
+2024-08-09 16:06:46,890 INFO    SystemMonitor:4958 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-08-09 16:06:46,890 INFO    HandlerThread:4958 [system_monitor.py:probe():214] Collecting system info
+2024-08-09 16:06:46,890 INFO    SystemMonitor:4958 [interfaces.py:start():188] Started cpu monitoring
+2024-08-09 16:06:46,891 INFO    SystemMonitor:4958 [interfaces.py:start():188] Started disk monitoring
+2024-08-09 16:06:46,892 INFO    SystemMonitor:4958 [interfaces.py:start():188] Started gpu monitoring
+2024-08-09 16:06:46,892 INFO    SystemMonitor:4958 [interfaces.py:start():188] Started memory monitoring
+2024-08-09 16:06:46,893 INFO    SystemMonitor:4958 [interfaces.py:start():188] Started network monitoring
+2024-08-09 16:06:46,917 DEBUG   HandlerThread:4958 [system_info.py:probe():152] Probing system
+2024-08-09 16:06:46,918 DEBUG   HandlerThread:4958 [gitlib.py:_init_repo():56] git repository is invalid
+2024-08-09 16:06:46,918 DEBUG   HandlerThread:4958 [system_info.py:probe():200] Probing system done
+2024-08-09 16:06:46,918 DEBUG   HandlerThread:4958 [system_monitor.py:probe():223] {'os': 'Linux-5.15.0-1065-aws-x86_64-with-glibc2.31', 'python': '3.10.10', 'heartbeatAt': '2024-08-09T16:06:46.917063', 'startedAt': '2024-08-09T16:06:46.572251', 'docker': None, 'cuda': None, 'args': ('--bert_version', 'bert-base-uncased', '--num_heads', '4', '--emb_dropout', '0.1', '--out_dropout', '0.1', '--lr', '0.001', '--n_epochs', '200', '--runs', '1', '--train_bsize', '128', '--val_bsize', '64', '--test_bsize', '64', '--optimizer_type', 'Adam', '--momentum', '0.9', '--enable_logger'), 'state': 'running', 'program': '/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py', 'codePathLocal': 'main.py', 'codePath': 'main.py', 'host': 'ip-10-192-12-69', 'username': 'zeus', 'executable': '/home/zeus/miniconda3/envs/cloudspace/bin/python', 'cpu_count': 8, 'cpu_count_logical': 16, 'cpu_freq': {'current': 2695.7034375, 'min': 0.0, 'max': 0.0}, 'cpu_freq_per_core': [{'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 3381.285, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}, {'current': 2649.998, 'min': 0.0, 'max': 0.0}], 'disk': {'/': {'total': 387.4823341369629, 'used': 55.3703498840332}}, 'gpu': 'NVIDIA L4', 'gpu_count': 1, 'gpu_devices': [{'name': 'NVIDIA L4', 'memory_total': 24152899584}], 'memory': {'total': 60.46141052246094}}
+2024-08-09 16:06:46,918 INFO    HandlerThread:4958 [system_monitor.py:probe():224] Finished collecting system info
+2024-08-09 16:06:46,918 INFO    HandlerThread:4958 [system_monitor.py:probe():227] Publishing system info
+2024-08-09 16:06:46,918 DEBUG   HandlerThread:4958 [system_info.py:_save_conda():209] Saving list of conda packages installed into the current environment
+2024-08-09 16:06:47,784 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_created():271] file/dir created: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/conda-environment.yaml
+2024-08-09 16:06:49,447 DEBUG   HandlerThread:4958 [system_info.py:_save_conda():224] Saving conda packages done
+2024-08-09 16:06:49,448 INFO    HandlerThread:4958 [system_monitor.py:probe():229] Finished publishing system info
+2024-08-09 16:06:49,454 DEBUG   SenderThread:4958 [sender.py:send():379] send: files
+2024-08-09 16:06:49,454 INFO    SenderThread:4958 [sender.py:_save_file():1454] saving file wandb-metadata.json with policy now
+2024-08-09 16:06:49,601 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: python_packages
+2024-08-09 16:06:49,601 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: python_packages
+2024-08-09 16:06:49,601 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: stop_status
+2024-08-09 16:06:49,602 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: stop_status
+2024-08-09 16:06:49,603 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: internal_messages
+2024-08-09 16:06:49,667 DEBUG   SenderThread:4958 [sender.py:send():379] send: telemetry
+2024-08-09 16:06:49,767 INFO    wandb-upload_0:4958 [upload_job.py:push():130] Uploaded file /tmp/tmp654zuo2_wandb/0yorim4d-wandb-metadata.json
+2024-08-09 16:06:49,783 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_modified():288] file/dir modified: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/conda-environment.yaml
+2024-08-09 16:06:49,783 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_created():271] file/dir created: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/wandb-metadata.json
+2024-08-09 16:06:49,784 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_created():271] file/dir created: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/requirements.txt
+2024-08-09 16:06:50,602 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: internal_messages
+2024-08-09 16:06:51,483 DEBUG   SenderThread:4958 [sender.py:send():379] send: config
+2024-08-09 16:06:51,484 DEBUG   SenderThread:4958 [sender.py:send():379] send: config
+2024-08-09 16:06:51,600 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: status_report
+2024-08-09 16:06:51,603 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: internal_messages
+2024-08-09 16:06:51,607 DEBUG   SenderThread:4958 [sender.py:send():379] send: exit
+2024-08-09 16:06:51,608 INFO    SenderThread:4958 [sender.py:send_exit():586] handling exit code: 1
+2024-08-09 16:06:51,608 INFO    SenderThread:4958 [sender.py:send_exit():588] handling runtime: 4
+2024-08-09 16:06:51,609 INFO    SenderThread:4958 [sender.py:_save_file():1454] saving file wandb-summary.json with policy end
+2024-08-09 16:06:51,609 INFO    SenderThread:4958 [sender.py:send_exit():594] send defer
+2024-08-09 16:06:51,609 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,609 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 0
+2024-08-09 16:06:51,609 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,609 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 0
+2024-08-09 16:06:51,610 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 1
+2024-08-09 16:06:51,610 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,610 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 1
+2024-08-09 16:06:51,610 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,610 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 1
+2024-08-09 16:06:51,610 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 2
+2024-08-09 16:06:51,610 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,610 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 2
+2024-08-09 16:06:51,610 INFO    HandlerThread:4958 [system_monitor.py:finish():203] Stopping system monitor
+2024-08-09 16:06:51,610 DEBUG   SystemMonitor:4958 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-08-09 16:06:51,610 INFO    HandlerThread:4958 [interfaces.py:finish():200] Joined cpu monitor
+2024-08-09 16:06:51,611 DEBUG   SystemMonitor:4958 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-08-09 16:06:51,611 INFO    HandlerThread:4958 [interfaces.py:finish():200] Joined disk monitor
+2024-08-09 16:06:51,611 DEBUG   SystemMonitor:4958 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-08-09 16:06:51,619 INFO    HandlerThread:4958 [interfaces.py:finish():200] Joined gpu monitor
+2024-08-09 16:06:51,619 INFO    HandlerThread:4958 [interfaces.py:finish():200] Joined memory monitor
+2024-08-09 16:06:51,619 INFO    HandlerThread:4958 [interfaces.py:finish():200] Joined network monitor
+2024-08-09 16:06:51,619 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,619 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 2
+2024-08-09 16:06:51,619 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 3
+2024-08-09 16:06:51,619 DEBUG   SenderThread:4958 [sender.py:send():379] send: stats
+2024-08-09 16:06:51,619 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,620 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 3
+2024-08-09 16:06:51,620 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,620 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 3
+2024-08-09 16:06:51,620 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 4
+2024-08-09 16:06:51,620 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,620 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 4
+2024-08-09 16:06:51,620 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,620 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 4
+2024-08-09 16:06:51,620 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 5
+2024-08-09 16:06:51,620 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,620 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 5
+2024-08-09 16:06:51,620 DEBUG   SenderThread:4958 [sender.py:send():379] send: summary
+2024-08-09 16:06:51,621 INFO    SenderThread:4958 [sender.py:_save_file():1454] saving file wandb-summary.json with policy end
+2024-08-09 16:06:51,621 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,621 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 5
+2024-08-09 16:06:51,621 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 6
+2024-08-09 16:06:51,621 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,621 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 6
+2024-08-09 16:06:51,621 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,621 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 6
+2024-08-09 16:06:51,624 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: status_report
+2024-08-09 16:06:51,714 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 7
+2024-08-09 16:06:51,714 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:51,714 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 7
+2024-08-09 16:06:51,715 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:51,715 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 7
+2024-08-09 16:06:51,784 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_modified():288] file/dir modified: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/config.yaml
+2024-08-09 16:06:51,784 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_created():271] file/dir created: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/output.log
+2024-08-09 16:06:51,784 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_created():271] file/dir created: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/wandb-summary.json
+2024-08-09 16:06:52,608 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: poll_exit
+2024-08-09 16:06:53,505 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 8
+2024-08-09 16:06:53,505 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: poll_exit
+2024-08-09 16:06:53,505 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:53,505 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 8
+2024-08-09 16:06:53,505 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:53,506 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 8
+2024-08-09 16:06:53,506 INFO    SenderThread:4958 [job_builder.py:build():440] Attempting to build job artifact
+2024-08-09 16:06:53,506 INFO    SenderThread:4958 [job_builder.py:_get_source_type():580] no source found
+2024-08-09 16:06:53,506 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 9
+2024-08-09 16:06:53,506 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:53,506 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 9
+2024-08-09 16:06:53,506 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:53,506 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 9
+2024-08-09 16:06:53,506 INFO    SenderThread:4958 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-08-09 16:06:53,608 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: poll_exit
+2024-08-09 16:06:53,784 INFO    Thread-12 :4958 [dir_watcher.py:_on_file_modified():288] file/dir modified: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/output.log
+2024-08-09 16:06:53,785 INFO    SenderThread:4958 [dir_watcher.py:finish():388] scan: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files
+2024-08-09 16:06:53,785 INFO    SenderThread:4958 [dir_watcher.py:finish():402] scan save: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/wandb-metadata.json wandb-metadata.json
+2024-08-09 16:06:53,785 INFO    SenderThread:4958 [dir_watcher.py:finish():402] scan save: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/conda-environment.yaml conda-environment.yaml
+2024-08-09 16:06:53,785 INFO    SenderThread:4958 [dir_watcher.py:finish():402] scan save: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/requirements.txt requirements.txt
+2024-08-09 16:06:53,786 INFO    SenderThread:4958 [dir_watcher.py:finish():402] scan save: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/config.yaml config.yaml
+2024-08-09 16:06:53,788 INFO    SenderThread:4958 [dir_watcher.py:finish():402] scan save: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/wandb-summary.json wandb-summary.json
+2024-08-09 16:06:53,788 INFO    SenderThread:4958 [dir_watcher.py:finish():402] scan save: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/output.log output.log
+2024-08-09 16:06:53,790 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 10
+2024-08-09 16:06:53,790 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: poll_exit
+2024-08-09 16:06:53,791 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:53,792 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 10
+2024-08-09 16:06:53,793 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:53,793 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 10
+2024-08-09 16:06:53,793 INFO    SenderThread:4958 [file_pusher.py:finish():169] shutting down file pusher
+2024-08-09 16:06:54,004 INFO    wandb-upload_3:4958 [upload_job.py:push():130] Uploaded file /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/wandb-summary.json
+2024-08-09 16:06:54,008 INFO    wandb-upload_0:4958 [upload_job.py:push():130] Uploaded file /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/conda-environment.yaml
+2024-08-09 16:06:54,012 INFO    wandb-upload_1:4958 [upload_job.py:push():130] Uploaded file /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/requirements.txt
+2024-08-09 16:06:54,018 INFO    wandb-upload_2:4958 [upload_job.py:push():130] Uploaded file /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/config.yaml
+2024-08-09 16:06:54,018 INFO    wandb-upload_4:4958 [upload_job.py:push():130] Uploaded file /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/files/output.log
+2024-08-09 16:06:54,218 INFO    Thread-11 (_thread_body):4958 [sender.py:transition_state():614] send defer: 11
+2024-08-09 16:06:54,219 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:54,219 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 11
+2024-08-09 16:06:54,219 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:54,219 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 11
+2024-08-09 16:06:54,219 INFO    SenderThread:4958 [file_pusher.py:join():175] waiting for file pusher
+2024-08-09 16:06:54,219 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 12
+2024-08-09 16:06:54,220 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:54,220 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 12
+2024-08-09 16:06:54,220 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:54,220 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 12
+2024-08-09 16:06:54,220 INFO    SenderThread:4958 [file_stream.py:finish():601] file stream finish called
+2024-08-09 16:06:54,281 INFO    SenderThread:4958 [file_stream.py:finish():605] file stream finish is done
+2024-08-09 16:06:54,281 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 13
+2024-08-09 16:06:54,281 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:54,281 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 13
+2024-08-09 16:06:54,281 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:54,281 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 13
+2024-08-09 16:06:54,282 INFO    SenderThread:4958 [sender.py:transition_state():614] send defer: 14
+2024-08-09 16:06:54,282 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: defer
+2024-08-09 16:06:54,282 DEBUG   SenderThread:4958 [sender.py:send():379] send: final
+2024-08-09 16:06:54,282 INFO    HandlerThread:4958 [handler.py:handle_request_defer():184] handle defer: 14
+2024-08-09 16:06:54,282 DEBUG   SenderThread:4958 [sender.py:send():379] send: footer
+2024-08-09 16:06:54,282 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: defer
+2024-08-09 16:06:54,282 INFO    SenderThread:4958 [sender.py:send_request_defer():610] handle sender defer: 14
+2024-08-09 16:06:54,283 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: poll_exit
+2024-08-09 16:06:54,283 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: poll_exit
+2024-08-09 16:06:54,283 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: server_info
+2024-08-09 16:06:54,283 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: poll_exit
+2024-08-09 16:06:54,284 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: server_info
+2024-08-09 16:06:54,285 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: get_summary
+2024-08-09 16:06:54,285 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: sampled_history
+2024-08-09 16:06:54,285 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: internal_messages
+2024-08-09 16:06:54,331 DEBUG   SenderThread:4958 [sender.py:send_request():406] send_request: poll_exit
+2024-08-09 16:06:54,332 INFO    MainThread:4958 [wandb_run.py:_footer_history_summary_info():4016] rendering history
+2024-08-09 16:06:54,332 INFO    MainThread:4958 [wandb_run.py:_footer_history_summary_info():4048] rendering summary
+2024-08-09 16:06:54,332 INFO    MainThread:4958 [wandb_run.py:_footer_sync_info():3975] logging synced files
+2024-08-09 16:06:54,332 DEBUG   HandlerThread:4958 [handler.py:handle_request():158] handle_request: shutdown
+2024-08-09 16:06:54,332 INFO    HandlerThread:4958 [handler.py:finish():882] shutting down handler
+2024-08-09 16:06:55,284 INFO    WriterThread:4958 [datastore.py:close():296] close: /teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/wandb/run-20240809_160646-0hiwfqmd/run-0hiwfqmd.wandb
+2024-08-09 16:06:55,332 INFO    SenderThread:4958 [sender.py:finish():1615] shutting down sender
+2024-08-09 16:06:55,332 INFO    SenderThread:4958 [file_pusher.py:finish():169] shutting down file pusher
+2024-08-09 16:06:55,332 INFO    SenderThread:4958 [file_pusher.py:join():175] waiting for file pusher

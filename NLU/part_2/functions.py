@@ -18,14 +18,17 @@ from model import ModelIAS
 from utils import PAD_TOKEN, DEVICE
 
 
-def train_step(model, data_loader, optimizer, criterion_slots, criterion_intents, clip=5):
+def train_step(model, data_loader, optimizer, criterion_slots, criterion_intents, lang, clip=5):
     model.train()
     loss_array = []
     for sample in data_loader:
         optimizer.zero_grad() # Zeroing the gradient
-        slots, intent = model(sample['utterances'], sample['slots_len'])
-        loss_intent = criterion_intents(intent, sample['intents'])
-        loss_slot = criterion_slots(slots, sample['y_slots'])
+
+        bert_input, bert_slots = set_bert_input_and_slots (sample, lang, model.tokenizer)
+        slots, intents = model(bert_input)
+
+        loss_intent = criterion_intents(intents, sample['intents'])
+        loss_slot = criterion_slots(slots, bert_slots)
         loss = loss_intent + loss_slot # In joint training we sum the losses. 
                                        # Is there another way to do that?
         loss_array.append(loss.item())
@@ -47,9 +50,12 @@ def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
     #softmax = nn.Softmax(dim=1) # Use Softmax if you need the actual probability
     with torch.no_grad(): # It used to avoid the creation of computational graph
         for sample in data_loader:
-            slots, intents = model(sample['utterances'], sample['slots_len'])
+            bert_input, bert_slots = set_bert_input_and_slots (sample, lang, model.tokenizer)
+            slots, intents = model(bert_input)
+            
             loss_intent = criterion_intents(intents, sample['intents'])
-            loss_slot = criterion_slots(slots, sample['y_slots'])
+            loss_slot = criterion_slots(slots, bert_slots)
+
             loss = loss_intent + loss_slot 
             loss_array.append(loss.item())
             # Intent inference
@@ -61,6 +67,11 @@ def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
             
             # Slot inference 
             output_slots = torch.argmax(slots, dim=1)
+            print("SLOTS SHAPE", slots.shape)
+            print("SLOTS", slots)
+            print("OUTPUT SLOTS SHAPE", output_slots.shape)
+            print("OUTPUT SLOTS", output_slots)
+            exit()
             for id_seq, seq in enumerate(output_slots):
                 length = sample['slots_len'].tolist()[id_seq]
                 utt_ids = sample['utterance'][id_seq][:length].tolist()
@@ -94,7 +105,7 @@ def train_loop(model, train_loader, val_loader, optimizer, criterion_slots, crit
     best_model = None
     best_f1 = 0
     for epoch in tqdm(range(1,n_epochs+1)):
-        loss = train_step(model, train_loader, optimizer, criterion_slots, criterion_intents, clip=clip)
+        loss = train_step(model, train_loader, optimizer, criterion_slots, criterion_intents, lang, clip=clip)
 
         if epoch % 5 == 0: # We check the performance every 5 epochs
             sampled_epochs.append(epoch)
@@ -123,40 +134,15 @@ def train_loop(model, train_loader, val_loader, optimizer, criterion_slots, crit
 INITIALIZATION FUNCTIONS
 """
 
-def init_weights(mat):
-    for m in mat.modules():
-        if type(m) in [nn.GRU, nn.LSTM, nn.RNN]:
-            for name, param in m.named_parameters():
-                if 'weight_ih' in name:
-                    for idx in range(4):
-                        mul = param.shape[0]//4
-                        torch.nn.init.xavier_uniform_(param[idx*mul:(idx+1)*mul])
-                elif 'weight_hh' in name:
-                    for idx in range(4):
-                        mul = param.shape[0]//4
-                        torch.nn.init.orthogonal_(param[idx*mul:(idx+1)*mul])
-                elif 'bias' in name:
-                    param.data.fill_(0)
-        else:
-            if type(m) in [nn.Linear]:
-                torch.nn.init.uniform_(m.weight, -0.01, 0.01)
-                if m.bias != None:
-                    m.bias.data.fill_(0.01)
-
-
 def init_components (args, lang) :
 
-    model = ModelIAS(args.emb_size, args.hid_size, len(lang.slot2id), len(lang.intent2id), len(lang.word2id),
-        n_layer=args.n_layers,
-        pad_index=PAD_TOKEN,
-        bidirectional=args.bidirectional,
+    model = ModelIAS(len(lang.slot2id), len(lang.intent2id), len(lang.word2id),
         dropout_enable=args.dropout_enable,
         emb_dropout=args.emb_dropout,
-        hid_dropout=args.hid_dropout,
-        out_dropout=args.out_dropout
+        out_dropout=args.out_dropout,
+        bert_version=args.bert_version,
+        num_heads=args.num_heads
     ).to(DEVICE)
-    
-    model.apply(init_weights)
 
     if args.optimizer_type == 'Adam' :
         optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(args.momentum, 0.999))
@@ -172,17 +158,47 @@ def init_components (args, lang) :
 
     return model, optimizer, criterion_slots, criterion_intents
 
+
 '''
 UTILITY
 '''
+
+def set_bert_input_and_slots (sample, lang, tokenizer):
+    # convert ids to words and tokenize them all at once
+    sentences = [[lang.id2word[y] for y in x.int().tolist()] for x in sample['utterance']]
+    sentences = [" ".join(x) for x in sentences]
+    bert_input = tokenizer(sentences, return_tensors="pt", padding=True)
+    bert_input = {k: v.to(DEVICE) for k, v in bert_input.items()}
+
+    # generate bert_slots
+    bert_slots = torch.ones((len(sentences), bert_input['input_ids'].shape[1]), dtype=torch.long, device=DEVICE) * PAD_TOKEN
+    for batch_id, sentence in enumerate(sentences) :
+        
+        counter = 1
+        for pos, word in enumerate(sentence.split()) :
+            tokens = tokenizer(word, padding=False)["input_ids"][1:-1]
+            curr_slot = sample['slots'][batch_id][pos]
+
+            for subtok in tokenizer.convert_ids_to_tokens(tokens):
+                if not str(subtok).startswith("##") :
+                    # subtokens will be skipped
+                    bert_slots[batch_id, counter] = curr_slot
+                counter += 1
+    
+    # Transform to tensor and return dict.
+    bert_slots = torch.Tensor(bert_slots).to(DEVICE)
+
+    return bert_input, bert_slots
+
 
 def save_model(model, filename='model.pt'):
     path = os.path.join("bin", model_name)
     torch.save(model.state_dict(), path)
 
-
 def get_num_parameters(model):
-    return sum(p.numel() for p in model.parameters())
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return total_params, trainable_params
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -190,16 +206,11 @@ def get_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     # Model args
-    parser.add_argument("--emb_size", type=int, default=300, required=False, help="size of word embedding")
-    parser.add_argument("--hid_size", type=int, default=200, required=False, help="width of recurrent layers")
-    parser.add_argument("--n_layers", type=int, default=1, required=False, help="number of stacked recurrent layers")
-    parser.add_argument("--emb_dropout", type=float, default=0.1, required=False, help="embedding layer dropout probability (requires dropout enabled to function)")
-    parser.add_argument("--hid_dropout", type=float, default=0.1, required=False, help="hidden recurrent layers dropout probability (requires dropout enabled to function)")
-    parser.add_argument("--out_dropout", type=float, default=0.1, required=False, help="rnn output layer dropout probability (requires dropout enabled to function)")
-
-    # Task specific flags
+    parser.add_argument("--bert_version", type=str, default="bert-base-uncased", required=False, help="bert version {bert-base-uncased, bert-base-cased}")
+    parser.add_argument("--num_heads", type=int, default=1, required=False, help="number of attention heads")
     parser.add_argument("--dropout_enable", default=False, action="store_true", required=False, help="enables dropout")
-    parser.add_argument("--bidirectional", default=False, action="store_true", required=False, help="enables bidirectionality in LSTM cell")
+    parser.add_argument("--emb_dropout", type=float, default=0.1, required=False, help="embedding layer dropout probability (requires dropout enabled to function)")
+    parser.add_argument("--out_dropout", type=float, default=0.1, required=False, help="rnn output layer dropout probability (requires dropout enabled to function)")
 
     # Training/Inference related args
     parser.add_argument("--lr", type=float, default=0.0001, required=False, help="learning rate")
@@ -229,9 +240,6 @@ def init_logger(args):
         # track hyperparameters and run metadata
         config={
         "learning_rate": args.lr,
-        "embedding_size" : args.emb_size,
-        "hidden_size" : args.hid_size,
-        "n_layers" : args.n_layer,
         "dataset": "ATIS",
         "optimizer" : args.optimizer_type,
         "momentum" : args.momentum,

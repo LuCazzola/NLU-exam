@@ -1,0 +1,35 @@
+Number of parameters: 111964572
+Trainable parameters: 2482332
+ATTN_INPUT :  cpu
+ATTN_MASK :  cuda:0
+  0%|                                                                                                                                                                                                       | 0/200 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py", line 35, in <module>
+    best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang,
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 112, in train_loop
+    loss = train_step(model, train_loader, optimizer, criterion_slots, criterion_intents, lang, clip=clip)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 33, in train_step
+    slots, intent = model(bert_input)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/model.py", line 50, in forward
+    token_embeddings = self.merger(bert_inputs, last_hidden_states)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/model.py", line 100, in forward
+    attn_output , attn_weights = self.self_attention(attn_input, attn_input, attn_input, attn_mask=attn_mask, need_weights=True)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 1241, in forward
+    attn_output, attn_output_weights = F.multi_head_attention_forward(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/functional.py", line 5336, in multi_head_attention_forward
+    q, k, v = _in_projection_packed(query, key, value, in_proj_weight, in_proj_bias)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/functional.py", line 4857, in _in_projection_packed
+    proj = linear(q, w, b)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cpu and cuda:0! (when checking argument for argument mat2 in method wrapper_CUDA_mm)

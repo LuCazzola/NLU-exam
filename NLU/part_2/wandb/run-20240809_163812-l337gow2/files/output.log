@@ -1,0 +1,21 @@
+Number of parameters: 111964572
+Trainable parameters: 2482332
+  0%|                                                                                                                                                                                                                                   | 0/200 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py", line 35, in <module>
+    best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang,
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 123, in train_loop
+    loss = train_step(model, train_loader, optimizer, criterion_slots, criterion_intents, lang, clip=clip)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 24, in train_step
+    for sample in data_loader:
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 631, in __next__
+    data = self._next_data()
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 675, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/utils.py", line 99, in __getitem__
+    check = self.tokenizer(word, padding=False)["input_ids"][0][1:-1]
+TypeError: 'int' object is not subscriptable

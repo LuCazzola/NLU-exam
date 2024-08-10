@@ -17,7 +17,7 @@ DROPOUT_ENABLE=false       # (true/false) enables dropout
 # Training settings
 LR=0.001                  # Learning rate
 N_EPOCHS=200               # Number of epochs
-RUNS=5
+RUNS=1
 OPTIMIZER_TYPE="Adam"       # (SGD, Adam, AdamW) : Type of optimizer
 MOMENTUM=0.9               # apply momentum to the optimizer
 TRAIN_BSIZE=128             # Training set batch size

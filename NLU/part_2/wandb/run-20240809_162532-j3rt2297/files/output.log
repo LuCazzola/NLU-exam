@@ -1,0 +1,23 @@
+Number of parameters: 111964572
+Trainable parameters: 2482332
+
+
+
+
+  2%|███▊                                                                                                                                                                                           | 4/200 [00:52<42:48, 13.10s/it]
+Traceback (most recent call last):
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py", line 35, in <module>
+    best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang,
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 117, in train_loop
+    results_val, intent_res, loss_val = eval_loop(model, val_loader, criterion_slots, criterion_intents, lang)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 67, in eval_loop
+    loss_slot = criterion_slots(slots, sample['y_bert_slots'])
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/loss.py", line 1179, in forward
+    return F.cross_entropy(input, target, weight=self.weight,
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/functional.py", line 3059, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(input, target, weight, _Reduction.get_enum(reduction), ignore_index, label_smoothing)
+RuntimeError: Expected target size [64, 31], got [64, 30]

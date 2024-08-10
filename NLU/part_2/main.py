@@ -3,6 +3,7 @@ This file is used to run your functions and print the results
 '''
 import wandb
 import numpy as np
+
 # Import everything from functions.py file
 from functions import train_loop, eval_loop, get_args, get_num_parameters, init_components, init_logger
 from utils import init_data, DEVICE
@@ -18,14 +19,17 @@ if __name__ == "__main__":
 
     slot_f1 = []
     int_acc = []
-    for idx in range(1,args.runs+1) :
-        model, optimizer, criterion_slots, criterion_intents = init_components(args, lang) 
-
+    for idx in range(1, args.runs+1) :
+        model, optimizer, criterion_slots, criterion_intents = init_components(args, lang)
+        
         if idx == 1 :
-            param_count = get_num_parameters(model)
-            print(f"Learnable parameters: {param_count}")
+            tot_params, trainable_params = get_num_parameters(model)
+            print(f"Number of parameters: {tot_params}")
+            print(f"Trainable parameters: {trainable_params}")
+
             if args.enable_logger :
-                wandb.config.update({"model_size": param_count})
+                wandb.config.update({"model_size": tot_params})
+                wandb.config.update({"trainable_size": tot_params})
 
         # model training
         best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang,
