@@ -1,0 +1,32 @@
+
+  0%|                                                                                                                                                                                                                                        | 0/10 [00:05<?, ?it/s]
+Traceback (most recent call last):
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py", line 34, in <module>
+    best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang,
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 105, in train_loop
+    loss = train_step(model, train_loader, optimizer, criterion_slots, criterion_intents, lang, clip=clip)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 27, in train_step
+    bert_input, bert_slots, _ = set_bert_input_and_slots (sample, lang, model.tokenizer)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 181, in set_bert_input_and_slots
+    subtokens = tokenizer(word, padding=False)["input_ids"][1:-1]
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2829, in __call__
+    encodings = self._call_one(text=text, text_pair=text_pair, **all_kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2935, in _call_one
+    return self.encode_plus(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 3008, in encode_plus
+    return self._encode_plus(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils.py", line 719, in _encode_plus
+    first_ids = get_input_ids(text)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils.py", line 686, in get_input_ids
+    tokens = self.tokenize(text, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils.py", line 617, in tokenize
+    tokenized_text.extend(self._tokenize(token))
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/models/bert/tokenization_bert.py", line 245, in _tokenize
+    for token in self.basic_tokenizer.tokenize(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/models/bert/tokenization_bert.py", line 445, in tokenize
+    split_tokens.extend(self._run_split_on_punc(token, never_split))
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/models/bert/tokenization_bert.py", line 481, in _run_split_on_punc
+    return ["".join(x) for x in output]
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/models/bert/tokenization_bert.py", line 481, in <listcomp>
+    return ["".join(x) for x in output]
+KeyboardInterrupt

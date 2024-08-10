@@ -1,0 +1,29 @@
+Number of parameters: 111964572
+Trainable parameters: 111964572
+  0%|                                                                                                                                                                                                                               | 0/200 [00:10<?, ?it/s]
+Traceback (most recent call last):
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py", line 35, in <module>
+    best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang,
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 105, in train_loop
+    loss = train_step(model, train_loader, optimizer, criterion_slots, criterion_intents, lang, clip=clip)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 27, in train_step
+    bert_input, bert_slots, _ = set_bert_input_and_slots (sample, lang, model.tokenizer)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 180, in set_bert_input_and_slots
+    subtokens = tokenizer(word, padding=False)["input_ids"][1:-1]
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2829, in __call__
+    encodings = self._call_one(text=text, text_pair=text_pair, **all_kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2935, in _call_one
+    return self.encode_plus(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 3008, in encode_plus
+    return self._encode_plus(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils.py", line 719, in _encode_plus
+    first_ids = get_input_ids(text)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils.py", line 686, in get_input_ids
+    tokens = self.tokenize(text, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils.py", line 573, in tokenize
+    text = re.sub(pattern, lambda m: m.groups()[0] or m.groups()[1].lower(), text)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/re.py", line 209, in sub
+    return _compile(pattern, flags).sub(repl, string, count)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/transformers/tokenization_utils.py", line 573, in <lambda>
+    text = re.sub(pattern, lambda m: m.groups()[0] or m.groups()[1].lower(), text)
+KeyboardInterrupt

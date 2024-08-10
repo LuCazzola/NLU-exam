@@ -4,10 +4,9 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BertTokenizer, BertModel
 
-
 class ModelIAS(nn.Module):
 
-    def __init__(self, out_slot, out_int, vocab_len, dropout_enable=False, emb_dropout=0.1, out_dropout=0.1, bert_version="bert-base-uncased", num_heads=4):
+    def __init__(self, out_slot, out_int, vocab_len, dropout_enable=False, merger_enable=False, int_dropout=0.1, slot_dropout=0.1, bert_version="bert-base-uncased", num_heads=4):
         super(ModelIAS, self).__init__()
         # out_slot = number of slots (output size for slot filling)
         # out_int = number of intents (output size for intent class)
@@ -19,7 +18,10 @@ class ModelIAS(nn.Module):
         hid_size = self.bertModel.config.hidden_size
 
         # computes self-attention for subtokens and returns unified representation
-        self.merger = SubtokenMerger(hid_size, num_heads, self.tokenizer)
+        # in the first subtoken of each word (which has been decomposed in subtokens)
+        self.merger_enable = merger_enable
+        if merger_enable :
+            self.merger = SubtokenMerger(hid_size, num_heads, self.tokenizer)
 
         # classifier for slots and intents
         self.slot_out = nn.Linear(hid_size, out_slot)
@@ -28,42 +30,38 @@ class ModelIAS(nn.Module):
         # Dropout layers
         self.dropout_enable = dropout_enable
         if dropout_enable :
-            self.dropoutEmb = nn.Dropout(emb_dropout)
-            self.dropoutOut = nn.Dropout(out_dropout)
-        
-        
-    def forward(self, bert_inputs):
-        
+            self.dropoutIntents = nn.Dropout(int_dropout)
+            self.dropoutSlots = nn.Dropout(slot_dropout)
+
+         
+    def forward(self, bert_inputs, subtoken_positions=None):
+        # embed inputs with BERT
         bert_out = self.bertModel(**bert_inputs)
-        
-        # Process the batch
-        pooler_output = bert_out.pooler_output
-        last_hidden_states = bert_out.last_hidden_state
+        # extract values
+        pooler_output = bert_out.pooler_output          # for Intents
+        last_hidden_states = bert_out.last_hidden_state # for Slots
 
-        # Dropout on embeddings
+        if self.merger_enable :
+            # computes self-attention for subtokens and returns unified representation
+            # in the first subtoken of each word (which has been decomposed in subtokens)
+            last_hidden_states, subtok_weights = self.merger(bert_inputs, last_hidden_states, subtoken_positions)
+        else :
+            # weights used for ensambling the result in the merger (batch, number of sub-tokenized words, weights)
+            subtok_weights = None
+
+        # Dropout layers before classifiers
         if self.dropout_enable :
-            pooler_output = self.dropoutEmb(pooler_output)
-            last_hidden_states = self.dropoutEmb(last_hidden_states)
-
-        # Forward the grouped embeddings through self.merger
-        #
-        #token_embeddings = self.merger(bert_inputs, last_hidden_states)
-        token_embeddings = last_hidden_states
-
-        # Dropout on rnn outputs
-        if self.dropout_enable :
-            token_embeddings = self.dropoutOut(token_embeddings)
+            pooler_output = self.dropoutIntents(pooler_output)
+            last_hidden_states = self.dropoutSlots(last_hidden_states)
         
-        # Compute slot logits
-        slots = self.slot_out(token_embeddings)
-        # Compute intent logits
+        # Compute logits for intents & logits
         intent = self.intent_out(pooler_output)
+        slots = self.slot_out(last_hidden_states)
         
-        # Slot size: batch_size, seq_len, classes 
-        slots = slots.permute(0,2,1) # We need this for computing the loss
-        # Slot size: batch_size, classes, seq_len
-        return slots, intent
+        # We need this for computing the loss (batch_size, classes, seq_len)
+        slots = slots.permute(0,2,1) 
 
+        return slots, intent, subtok_weights
 
 
 class SubtokenMerger(nn.Module):
@@ -74,21 +72,23 @@ class SubtokenMerger(nn.Module):
         self.tokenizer = tokenizer
         self.num_heads = num_heads
 
-    def forward(self, bert_inputs, token_embeddings):
+    def forward(self, bert_inputs, token_embeddings, subtoken_positions):
         batch_size = token_embeddings.shape[0]
         hidden_size = token_embeddings.shape[-1]
 
         # compute mapping between words and corresponding subtokens
-        word_tok_map = self.get_subtok_map(bert_inputs, batch_size)
+        word_tok_map = self.get_subtok_map(bert_inputs, subtoken_positions, batch_size)
         # use the mapping to get the relative tensors
         subtokens = self.get_subtokens(token_embeddings, word_tok_map, batch_size, hidden_size) # shape : (batch_size, subtokenized_words_count, subtok_count, hidden_size)
+        subtokens = subtokens.to(token_embeddings.device)
+        
         subtokenized_words_count = subtokens.shape[1]
         subtok_count = subtokens.shape[2]
 
         # Reshape to (batch_size * subtokenized_words_count, subtok_count, hidden_size) to prepare for multihead self-attention 
         attn_input = subtokens.view(-1, subtok_count, hidden_size)
         # compute attention mask for paddings
-        attn_mask = (subtokens.sum(dim=-1) != 0).view(-1, subtok_count).float().unsqueeze(-1).to(token_embeddings.device)
+        attn_mask = (subtokens.sum(dim=-1) != 0).view(-1, subtok_count).float().unsqueeze(-1)
         attn_mask = attn_mask.expand(-1, -1, subtok_count) * attn_mask.transpose(1, 2).expand(-1, subtok_count, -1)
         attn_mask_preExpand = attn_mask.clone()
         # expand to all attention heads
@@ -96,7 +96,7 @@ class SubtokenMerger(nn.Module):
 
         # Apply multihead attention
         # 
-        attn_output , attn_weights = self.self_attention(attn_input, attn_input, attn_input, attn_mask=attn_mask, need_weights=True)
+        _ , attn_weights = self.self_attention(attn_input, attn_input, attn_input, attn_mask=attn_mask, need_weights=True)
 
         # mask attention weights and sum over subtok dimension
         subtok_contributions = (attn_mask_preExpand * attn_weights).sum(dim=1) 
@@ -105,40 +105,47 @@ class SubtokenMerger(nn.Module):
         subtok_contributions = subtok_contributions.view(batch_size, subtokenized_words_count, subtok_count)
 
         # Substitute subtokens with unified representation
+        new_token_embeddings = token_embeddings.clone()
         for batch_idx, mappings in enumerate(word_tok_map):
             for tok_idx, mapping in enumerate(mappings):
+                # weighted sum of subtokens by the attention weights
                 unified_word = (token_embeddings[batch_idx, mapping] * subtok_contributions[batch_idx, tok_idx, :len(mapping)].unsqueeze(-1)).sum(dim=0)
-                token_embeddings[batch_idx, mapping[0]] = unified_word  # Substitute the first subtoken with the unified representation
-                token_embeddings[batch_idx, mapping[1:]] *= 0.0  # Zero all the other subtokens
-        
-        return token_embeddings
+                # Substitute the first subtoken with the unified representation
+                new_token_embeddings[batch_idx, mapping[0]] = unified_word  
+                # Zero all the other subtokens (not really necessary as they're masked in the loss function)    
+                new_token_embeddings[batch_idx, mapping[1:]] = 0.0  
+
+        # Format better attention weights for validate later results
+        subtok_weights = word_tok_map.copy()
+        for batch_idx, mapping in enumerate(word_tok_map):
+            if len(mapping) > 0:
+                for word_idx, word in enumerate(mapping) :
+                    # subtok_weights = (batch_size, subtokenized_words_count, subtok_count)
+                    subtok_weights[batch_idx][word_idx] = subtok_contributions[batch_idx, word_idx, :len(word)].tolist()
+            else :
+                subtok_weights[batch_idx] = []
+
+        # return the new embeddings and the attention weights
+        return new_token_embeddings, subtok_weights
     
 
-    def get_subtok_map (self, bert_inputs, batch_size):
-        # Create a dictionary to map subtokens to their original word
-        idx_dict = [[] for _ in range(batch_size)]
+    def get_subtok_map (self, bert_inputs, subtoken_positions, batch_size):
+        word_tok_map = [[] for _ in range(batch_size)]
 
-        # Group tensors belonging to the same original word
-        for batch, ids in enumerate(bert_inputs["input_ids"]):
-            tokens = self.tokenizer.convert_ids_to_tokens(ids)
+        for batch_id in range(batch_size):
+            # if the sequence contains subtokens
+            if len(subtoken_positions[batch_id]) > 0:
+                set_copy = subtoken_positions[batch_id].copy()
+                set_copy.update(element-1 for element in subtoken_positions[batch_id] if element-1 not in subtoken_positions[batch_id])
+                subtoks = sorted(set_copy)
+                
+                word_tok_map[batch_id].append([subtoks[0]])
+                for i in range(1, len(subtoks)):
+                    if subtoks[i] != subtoks[i-1] + 1:
+                        word_tok_map[batch_id].append([])
+                    word_tok_map[batch_id][-1].append(subtoks[i])
 
-            key = 0
-            for idx, token in enumerate(tokens):
-                if token == "[PAD]":
-                    continue
-
-                if not token.startswith("##"):
-                    idx_dict[batch].append([])
-                    idx_dict[batch][key].append(idx)
-                    key += 1
-                else:
-                    idx_dict[batch][key-1].append(idx)
-        
-        # Drop lists of length 1
-        for batch in range(batch_size):
-            idx_dict[batch] = [tok_pointer for tok_pointer in idx_dict[batch] if len(tok_pointer) > 1]
-
-        return idx_dict
+        return word_tok_map
     
 
     def get_subtokens (self, subtoken_embeddings, word_tok_map, batch_size, hidden_size):
@@ -152,13 +159,13 @@ class SubtokenMerger(nn.Module):
             sequence_word_subtok = [subtoken_embeddings[batch_idx, mapping] for mapping in word_tok_map[batch_idx]]
 
             if len(sequence_word_subtok) > 0:
-                sequence_word_subtok_padded = torch.stack([torch.cat([word, torch.zeros((subtok_count - word.shape[0], hidden_size), device=subtoken_embeddings.device)], dim=0) for word in sequence_word_subtok], dim=0)
+                sequence_word_subtok_padded = torch.stack([torch.cat([word, torch.zeros((subtok_count - word.shape[0], hidden_size), device=subtoken_embeddings.device )], dim=0) for word in sequence_word_subtok], dim=0)
                 # pad the sequence of subtokens to have a tensor of shape (n_words, max_subtokens, hidden_size)
                 ensambler_input.append(sequence_word_subtok_padded)
             else :
                 # if the sequence has no sub-tokens, append a zero mask
                 ensambler_input.append(torch.zeros(1, subtok_count, hidden_size))
         
-        ensambler_input = pad_sequence(ensambler_input, batch_first=True, padding_value=0).to(subtoken_embeddings.device)
+        ensambler_input = pad_sequence(ensambler_input, batch_first=True, padding_value=0)
 
         return ensambler_input

@@ -12,9 +12,6 @@ if __name__ == "__main__":
     # Parse arguments
     args = get_args()
     
-    if args.enable_logger :
-        init_logger(args)
-
     lang, train_loader, val_loader, test_loader = init_data(args)
 
     slot_f1 = []
@@ -26,10 +23,12 @@ if __name__ == "__main__":
             tot_params, trainable_params = get_num_parameters(model)
             print(f"Number of parameters: {tot_params}")
             print(f"Trainable parameters: {trainable_params}")
-
-            if args.enable_logger :
+        if args.enable_logger :
+            init_logger(args)
+            if idx == 1 :
                 wandb.config.update({"model_size": tot_params})
                 wandb.config.update({"trainable_size": tot_params})
+            wandb.config.update({"run_idx": idx})
 
         # model training
         best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang,
@@ -39,21 +38,20 @@ if __name__ == "__main__":
         ).to(DEVICE)
 
         # model inference
-        results_test, intent_test, _ = eval_loop(model, test_loader, criterion_slots, criterion_intents, lang)    
+        results_test, intent_test, _, _ = eval_loop(model, test_loader, criterion_slots, criterion_intents, lang)    
         print(f"run {idx} : slot F1 = {results_test['total']['f']}, intent acc. = {intent_test['accuracy']}")
         slot_f1.append(results_test['total']['f'])
         int_acc.append(intent_test['accuracy'])
 
-    
+        # Close the logger
+        if args.enable_logger:
+            wandb.log({"mean Slot F1": slot_f1[-1], "mean Intent accuracy": int_acc[-1]})
+            wandb.finish()
+
     # average runs results and show
     mean_slot_f1 = np.asarray(slot_f1).mean()
     mean_int_acc = np.asarray(int_acc).mean()
     print('Slot F1: ', mean_slot_f1)
     print('Intent Accuracy:', mean_int_acc)
-
-    # Close the logger
-    if args.enable_logger:
-        wandb.log({"mean Slot F1": mean_slot_f1, "mean Intent accuracy": mean_int_acc})
-        wandb.finish()
 
 

@@ -5,14 +5,16 @@
 # Parameters for the model
 BERT_VERSION="bert-base-uncased" # (bert-base-uncased, bert-large-uncased, bert-base-cased, bert-large-cased) 
 NUM_HEADS=4                      # Number of attention heads
-DROPOUT_ENABLE=false             # (true/false) enables dropout
-EMB_DROPOUT=0.1                  # embedding layer dropout probability
-OUT_DROPOUT=0.1                  # rnn output layer dropout probability
+INT_DROPOUT=0.1                  # intents dropout probability (applied before classifier)
+SLOT_DROPOUT=0.1                 # slots dropout probability (applied before classifier)
 
+# component flags
+MERGER_ENABLE=true               # (true/false) enables the subtoken merger
+DROPOUT_ENABLE=true              # (true/false) enables dropout
 
 # Training settings
 LR=0.0001                  # Learning rate
-N_EPOCHS=200               # Number of epochs
+N_EPOCHS=10                # Number of epochs
 RUNS=1
 OPTIMIZER_TYPE="Adam"       # (SGD, Adam, AdamW) : Type of optimizer
 MOMENTUM=0.9               # apply momentum to the optimizer
@@ -34,8 +36,8 @@ CMD="python main.py"
 # Include variables
 CMD+=" --bert_version $BERT_VERSION"
 CMD+=" --num_heads $NUM_HEADS"
-CMD+=" --emb_dropout $EMB_DROPOUT"
-CMD+=" --out_dropout $OUT_DROPOUT"
+CMD+=" --int_dropout $INT_DROPOUT"
+CMD+=" --slot_dropout $SLOT_DROPOUT"
 CMD+=" --lr $LR"
 CMD+=" --n_epochs $N_EPOCHS"
 CMD+=" --runs $RUNS"
@@ -48,6 +50,9 @@ CMD+=" --momentum $MOMENTUM"
 # Include flags
 if [ "$DROPOUT_ENABLE" = true ]; then
   CMD+=" --dropout_enable"
+fi
+if [ "$MERGER_ENABLE" = true ]; then
+  CMD+=" --merger_enable"
 fi
 if [ "$LOAD_CHECKPOINT" != "None" ]; then
   CMD+=" --load_checkpoint $LOAD_CHECKPOINT"

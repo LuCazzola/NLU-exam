@@ -17,15 +17,19 @@ import wandb
 from model import ModelIAS
 from utils import PAD_TOKEN, DEVICE
 
+torch.autograd.set_detect_anomaly(True)
 
 def train_step(model, data_loader, optimizer, criterion_slots, criterion_intents, lang, clip=5):
     model.train()
     loss_array = []
     for sample in data_loader:
         optimizer.zero_grad() # Zeroing the gradient
-
-        bert_input, bert_slots = set_bert_input_and_slots (sample, lang, model.tokenizer)
-        slots, intents = model(bert_input)
+        # Prepare the input for the model
+        bert_input, bert_slots, special_tokens = set_bert_input_and_slots (sample, lang, model.tokenizer)
+        subtoken_poses = get_subtok_poses(special_tokens, bert_input['input_ids'].shape[0])
+        
+        # forward input to model
+        slots, intents, _ = model(bert_input, subtoken_poses)
 
         loss_intent = criterion_intents(intents, sample['intents'])
         loss_slot = criterion_slots(slots, bert_slots)
@@ -45,14 +49,21 @@ def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
     hyp_intents = []
     ref_slots = []
     hyp_slots = []
+    subtok_weights_array = []
 
     model.eval()
     #softmax = nn.Softmax(dim=1) # Use Softmax if you need the actual probability
     with torch.no_grad(): # It used to avoid the creation of computational graph
         for sample in data_loader:
-            bert_input, bert_slots = set_bert_input_and_slots (sample, lang, model.tokenizer)
-            slots, intents = model(bert_input)
-            
+            # Prepare the input for the model
+            bert_input, bert_slots, special_tokens = set_bert_input_and_slots (sample, lang, model.tokenizer)
+            slots_eval_ignore = copy.deepcopy(special_tokens) # This is used to ignore the special tokens on the slot evaluation
+            subtoken_poses = get_subtok_poses(special_tokens, bert_input['input_ids'].shape[0])
+
+            # forward input to model
+            slots, intents, subtok_weights = model(bert_input, subtoken_poses)
+            subtok_weights_array.append(subtok_weights)
+
             loss_intent = criterion_intents(intents, sample['intents'])
             loss_slot = criterion_slots(slots, bert_slots)
 
@@ -67,24 +78,23 @@ def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
             
             # Slot inference 
             output_slots = torch.argmax(slots, dim=1)
-            print("SLOTS SHAPE", slots.shape)
-            print("SLOTS", slots)
-            print("OUTPUT SLOTS SHAPE", output_slots.shape)
-            print("OUTPUT SLOTS", output_slots)
-            exit()
             for id_seq, seq in enumerate(output_slots):
+                # Remove the ignored tokens
+                seq = [elem for id_el, elem in enumerate(seq.tolist()) if id_el not in slots_eval_ignore[id_seq]]
+                # Rest remains the same
                 length = sample['slots_len'].tolist()[id_seq]
                 utt_ids = sample['utterance'][id_seq][:length].tolist()
                 gt_ids = sample['y_slots'][id_seq].tolist()
                 gt_slots = [lang.id2slot[elem] for elem in gt_ids[:length]]
                 utterance = [lang.id2word[elem] for elem in utt_ids]
-                to_decode = seq[:length].tolist()
+                to_decode = seq[:length]
                 ref_slots.append([(utterance[id_el], elem) for id_el, elem in enumerate(gt_slots)])
                 tmp_seq = []
                 for id_el, elem in enumerate(to_decode):
                     tmp_seq.append((utterance[id_el], lang.id2slot[elem]))
                 hyp_slots.append(tmp_seq)
-    try:            
+            
+    try:
         results = evaluate(ref_slots, hyp_slots)
     except Exception as ex:
         # Sometimes the model predicts a class that is not in REF
@@ -93,25 +103,31 @@ def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
         hyp_s = set([x[1] for x in hyp_slots])
         print(hyp_s.difference(ref_s))
         results = {"total":{"f":0}}
-        
+
     report_intent = classification_report(ref_intents, hyp_intents, zero_division=False, output_dict=True)
-    return results, report_intent, loss_array
+    return results, report_intent, loss_array, subtok_weights_array
 
 
 def train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang, n_epochs=200, clip=5, patience=5):
     losses_train = []
     losses_val = []
     sampled_epochs = []
+    subtok_weights_epochs = []
+
     best_model = None
     best_f1 = 0
     for epoch in tqdm(range(1,n_epochs+1)):
         loss = train_step(model, train_loader, optimizer, criterion_slots, criterion_intents, lang, clip=clip)
 
-        if epoch % 5 == 0: # We check the performance every 5 epochs
+        if epoch % 5 == 0 or epoch == 1:
             sampled_epochs.append(epoch)
             losses_train.append(np.asarray(loss).mean())
-            results_val, intent_res, loss_val = eval_loop(model, val_loader, criterion_slots, criterion_intents, lang)
+            results_val, intent_res, loss_val, subtok_weights = eval_loop(model, val_loader, criterion_slots, criterion_intents, lang)
+            subtok_weights_epochs.append(subtok_weights)
             losses_val.append(np.asarray(loss_val).mean())
+
+            #print(f"[{epoch}] SUBTOK_WEIGHTS ", subtok_weights_epochs[-1][0])
+            #print("==="*20)
 
             if wandb.run is not None:
                 wandb.log({"val Slot F1": results_val['total']['f'], "val Intent acc": intent_res['accuracy']}, step=epoch)
@@ -138,8 +154,9 @@ def init_components (args, lang) :
 
     model = ModelIAS(len(lang.slot2id), len(lang.intent2id), len(lang.word2id),
         dropout_enable=args.dropout_enable,
-        emb_dropout=args.emb_dropout,
-        out_dropout=args.out_dropout,
+        merger_enable=args.merger_enable,
+        int_dropout=args.int_dropout,
+        slot_dropout=args.slot_dropout,
         bert_version=args.bert_version,
         num_heads=args.num_heads
     ).to(DEVICE)
@@ -172,23 +189,44 @@ def set_bert_input_and_slots (sample, lang, tokenizer):
 
     # generate bert_slots
     bert_slots = torch.ones((len(sentences), bert_input['input_ids'].shape[1]), dtype=torch.long, device=DEVICE) * PAD_TOKEN
+    # keeps trak of the position of both sub-tokens and special tokens [CLS] and [SEP]
+    special_tokens = {batch_id: set() for batch_id in range(len(sentences))}
+    
     for batch_id, sentence in enumerate(sentences) :
+        # [CLS] token need to be ignored on slot inference
+        special_tokens[batch_id].add(0)
         
         counter = 1
         for pos, word in enumerate(sentence.split()) :
-            tokens = tokenizer(word, padding=False)["input_ids"][1:-1]
+            subtokens = tokenizer(word, padding=False)["input_ids"][1:-1]
             curr_slot = sample['slots'][batch_id][pos]
 
-            for subtok in tokenizer.convert_ids_to_tokens(tokens):
-                if not str(subtok).startswith("##") :
-                    # subtokens will be skipped
-                    bert_slots[batch_id, counter] = curr_slot
-                counter += 1
+            # assign to the first subtoken the slot of the word
+            bert_slots[batch_id, counter] = curr_slot
+            counter += 1
+
+            remaining_sub_toks = len(subtokens) - 1
+            if remaining_sub_toks == 0:
+                continue
+            
+            special_tokens[batch_id].update(range(counter, counter + remaining_sub_toks)) 
+            counter += remaining_sub_toks
+
+        # also [SEP] token need to be ignored on slot inference
+        special_tokens[batch_id].add(counter)
     
     # Transform to tensor and return dict.
     bert_slots = torch.Tensor(bert_slots).to(DEVICE)
 
-    return bert_input, bert_slots
+    return bert_input, bert_slots, special_tokens
+
+def get_subtok_poses (special_tokens, batch_size):
+    subtoken_poses = special_tokens.copy()
+    for batch_id in range(batch_size):
+        subtoken_poses[batch_id].discard(0)                             # remove [CLS] token reference
+        subtoken_poses[batch_id].discard(max(subtoken_poses[batch_id])) # remove [SEP] token reference
+
+    return subtoken_poses
 
 
 def save_model(model, filename='model.pt'):
@@ -208,9 +246,12 @@ def get_args():
     # Model args
     parser.add_argument("--bert_version", type=str, default="bert-base-uncased", required=False, help="bert version {bert-base-uncased, bert-base-cased}")
     parser.add_argument("--num_heads", type=int, default=1, required=False, help="number of attention heads")
+    parser.add_argument("--int_dropout", type=float, default=0.1, required=False, help="intents dropout probability")
+    parser.add_argument("--slot_dropout", type=float, default=0.1, required=False, help="slots dropout probability")
+
+    # component flags
     parser.add_argument("--dropout_enable", default=False, action="store_true", required=False, help="enables dropout")
-    parser.add_argument("--emb_dropout", type=float, default=0.1, required=False, help="embedding layer dropout probability (requires dropout enabled to function)")
-    parser.add_argument("--out_dropout", type=float, default=0.1, required=False, help="rnn output layer dropout probability (requires dropout enabled to function)")
+    parser.add_argument("--merger_enable", default=False, action="store_true", required=False, help="enables merger component using self attention")
 
     # Training/Inference related args
     parser.add_argument("--lr", type=float, default=0.0001, required=False, help="learning rate")
