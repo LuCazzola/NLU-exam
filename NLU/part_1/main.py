@@ -34,7 +34,7 @@ if __name__ == "__main__":
             ).to(DEVICE)
 
             # model inference
-            results_test, intent_test, _ = eval_loop(model, test_loader, criterion_slots, criterion_intents, lang)    
+            results_test, intent_test, _ = eval_loop(best_model, test_loader, criterion_slots, criterion_intents, lang)    
             print(f"run {idx} : slot F1 = {results_test['total']['f']}, intent acc. = {intent_test['accuracy']}")
             slot_f1.append(results_test['total']['f'])
             int_acc.append(intent_test['accuracy'])
@@ -57,8 +57,8 @@ if __name__ == "__main__":
     # if test_only is enabled simply load the model and test it showing results
     else :
         model, optimizer, criterion_slots, criterion_intents = init_components(args, lang)
-         # model inference
+        # model inference
         results_test, intent_test, _, _ = eval_loop(model, test_loader, criterion_slots, criterion_intents, lang)    
-        print(f"run {idx} : slot F1 = {results_test['total']['f']}, intent acc. = {intent_test['accuracy']}")
+        print(f"slot F1 = {results_test['total']['f']}, intent acc. = {intent_test['accuracy']}")
 
 
