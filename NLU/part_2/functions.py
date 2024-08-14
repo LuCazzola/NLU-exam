@@ -223,7 +223,7 @@ def init_components (args, lang) :
     # Load model weights if the path is passed as parameter
     # Oterwise initialize base weights
     if args.load_checkpoint is not None :
-        model.load_state_dict(torch.load(args.load_checkpoint))
+        model.load_state_dict(torch.load(args.load_checkpoint, map_location=torch.device(DEVICE)))
 
     if args.optimizer_type == 'Adam' :
         optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(args.momentum, 0.999))
