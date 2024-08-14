@@ -1,0 +1,10 @@
+/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/rnn.py:83: UserWarning: dropout option adds dropout after all but last recurrent layer, so non-zero dropout expects num_layers greater than 1, but got dropout=0.1 and num_layers=1
+  warnings.warn("dropout option adds dropout after all but last "
+
+
+
+
+
+
+PPL: 148.978030:   5%|████████▋                                                                                                                                                                     | 5/100 [01:24<26:37, 16.82s/it]
+Test ppl:  131.27212812507983

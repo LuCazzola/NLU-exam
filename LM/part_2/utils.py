@@ -13,30 +13,28 @@ CLASSES
 """
 
 class Lang():
-    '''
-    Computes and stores the vocabulary, mapping:
-    - Word -> ids
-    - ids -> word
-    
-    Parameters:
-        corpus (list of str): List of sentences forming the corpus.
-        special_tokens (list of str, optional): List of special tokens to include in the vocabulary. Default is [].
-    '''
+    """
+    A class to handle vocabulary and word-to-ID mappings.
+
+    Args:
+        corpus (list of str): List of sentences where each sentence is a string of space-separated tokens.
+        special_tokens (list of str, optional): List of special tokens to include in the vocabulary. Default is an empty list.
+    """
     def __init__(self, corpus, special_tokens=[]):
         self.word2id = self.get_vocab(corpus, special_tokens)
         self.id2word = {v:k for k, v in self.word2id.items()}
     
     def get_vocab(self, corpus, special_tokens=[]):
-        '''
-        Constructs the vocabulary from the given corpus and special tokens.
-        
-        Parameters:
-            corpus (list of str): List of sentences forming the corpus.
-            special_tokens (list of str): List of special tokens to include in the vocabulary.
-        
+        """
+        Generate vocabulary mapping from tokens to IDs.
+
+        Args:
+            corpus (list of str): List of sentences where each sentence is a string of space-separated tokens.
+            special_tokens (list of str, optional): List of special tokens to include in the vocabulary. Default is an empty list.
+
         Returns:
-            dict: Mapping of words to unique ids.
-        '''
+            dict: A dictionary mapping tokens to unique IDs.
+        """
         output = {}
         i = 0 
         for st in special_tokens:
@@ -51,13 +49,13 @@ class Lang():
 
 
 class PennTreeBank (data.Dataset):
-    '''
-    Custom Dataset for Penn Tree Bank corpus.
-    
-    Parameters:
-        corpus (list of str): List of sentences forming the corpus.
-        lang (Lang): Language object containing the vocabulary mappings.
-    '''
+    """
+    A Dataset class for the PennTreeBank corpus.
+
+    Args:
+        corpus (list of str): List of sentences where each sentence is a string of space-separated tokens.
+        lang (Lang): An instance of the Lang class containing word-to-ID mappings.
+    """
     def __init__(self, corpus, lang):
         self.source = []
         self.target = []
@@ -80,16 +78,16 @@ class PennTreeBank (data.Dataset):
         return sample
     
     def mapping_seq(self, data, lang): # Map sequences of tokens to corresponding computed in Lang class
-        '''
-        Maps sequences of tokens to their corresponding ids using the Lang class.
-        
-        Parameters:
-            data (list of list of str): Sequences of tokens.
-            lang (Lang): Language object containing the vocabulary mappings.
-        
+        """
+        Map sequences of tokens to corresponding IDs.
+
+        Args:
+            data (list of list of str): List of sequences, where each sequence is a list of tokens.
+            lang (Lang): An instance of the Lang class containing word-to-ID mappings.
+
         Returns:
-            list of list of int: Mapped sequences of token ids.
-        '''
+            list of list of int: List of sequences with tokens replaced by their corresponding IDs.
+        """
         res = []
         for seq in data:
             tmp_seq = []
@@ -110,16 +108,16 @@ UTILITY FUNCTIONS
 """
 
 def read_file(path, eos_token="<eos>"):
-    '''
-    Loads the given corpus from a file and appends an end-of-sentence token to each sentence.
-    
-    Parameters:
-        path (str): Path to the corpus file.
-        eos_token (str): End-of-sentence token to be appended. Default is "<eos>".
-    
+    """
+    Read a text file and append an end-of-sequence token to each line.
+
+    Args:
+        path (str): Path to the text file.
+        eos_token (str, optional): End-of-sequence token to append. Default is "<eos>".
+
     Returns:
-        list of str: List of sentences from the corpus.
-    '''
+        list of str: List of sentences with each line ending in the end-of-sequence token.
+    """
     output = []
     with open(path, "r") as f:
         for line in f.readlines():
@@ -128,27 +126,18 @@ def read_file(path, eos_token="<eos>"):
 
 
 def collate_fn(data, pad_token):
-    '''
-    Custom collate function to merge sequences and pad them to the same length.
-    
-    Parameters:
-        data (list of dict): Batch of data samples.
-        pad_token (int): Token used for padding sequences.
-    
+     """
+    Custom collate function for padding and batching data.
+
+    Args:
+        data (list of dict): List of samples where each sample is a dictionary with 'source' and 'target' tensors.
+        pad_token (int): Token ID used for padding.
+
     Returns:
-        dict: Batch with padded sequences and additional metadata.
-    '''
+        dict: A dictionary containing padded 'source' and 'target' tensors and total number of tokens.
+    """
 
     def merge(sequences):
-        '''
-        Merges a list of sequences into a single tensor, padding to the maximum length.
-        
-        Parameters:
-            sequences (list of torch.Tensor): List of sequences to merge.
-        
-        Returns:
-            tuple: Padded tensor of sequences and list of original sequence lengths.
-        '''
         lengths = [len(seq) for seq in sequences]
         max_len = 1 if max(lengths)==0 else max(lengths)
         # Pad token is zero in our case
@@ -177,15 +166,18 @@ def collate_fn(data, pad_token):
 
 
 def init_data(args):
-    '''
-    Instantiates data sources and DataLoader objects.
-    
-    Parameters:
-        args (argparse.Namespace): Arguments containing batch sizes for train, val, and test sets.
-    
+    """
+    Initialize data loaders and vocabulary for training, validation, and test datasets.
+
+    Args:
+        args (argparse.Namespace): Arguments containing batch sizes for training, validation, and test datasets.
+
     Returns:
-        tuple: Language object, train DataLoader, val DataLoader, test DataLoader.
-    '''
+        Lang: An instance of the Lang class containing word-to-ID mappings.
+        DataLoader: DataLoader for training dataset.
+        DataLoader: DataLoader for validation dataset.
+        DataLoader: DataLoader for test dataset.
+    """
     # Read raw corpus
     train_raw = read_file("dataset/PennTreeBank/ptb.train.txt")
     dev_raw = read_file("dataset/PennTreeBank/ptb.valid.txt")

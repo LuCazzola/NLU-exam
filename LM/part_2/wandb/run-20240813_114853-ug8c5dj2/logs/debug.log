@@ -1,0 +1,37 @@
+2024-08-13 11:48:53,737 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Current SDK version is 0.17.5
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Configure stats pid to 223756
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Loading settings from /teamspace/studios/this_studio/.config/wandb/settings
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Loading settings from /teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_2/wandb/settings
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'main.py', 'program_abspath': '/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_2/main.py', 'program': '/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_2/main.py'}
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_setup.py:_flush():76] Applying login settings: {}
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_init.py:_log_setup():529] Logging user logs to /teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_2/wandb/run-20240813_114853-ug8c5dj2/logs/debug.log
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_init.py:_log_setup():530] Logging internal logs to /teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_2/wandb/run-20240813_114853-ug8c5dj2/logs/debug-internal.log
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_init.py:init():569] calling init triggers
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_init.py:init():576] wandb.init called with sweep_config: {}
+config: {'learning_rate': 1.0, 'embedding_size': 300, 'hidden_size': 300, 'architecture': 'LSTM', 'dataset': 'PennTreeBank', 'epochs': 100, 'embedding_dropout': 0.1, 'hidden_dropout': 0.25, 'output_dropout': 0.1, 'optimizer': 'SGD', 'weight_tying': True, 'var_dropout': True, 'nmt_AvSGD_enabled': True}
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_init.py:init():619] starting backend
+2024-08-13 11:48:53,738 INFO    MainThread:223756 [wandb_init.py:init():623] setting up manager
+2024-08-13 11:48:53,739 INFO    MainThread:223756 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-08-13 11:48:53,740 INFO    MainThread:223756 [wandb_init.py:init():631] backend started and connected
+2024-08-13 11:48:53,741 INFO    MainThread:223756 [wandb_init.py:init():720] updated telemetry
+2024-08-13 11:48:53,742 INFO    MainThread:223756 [wandb_init.py:init():753] communicating run to backend with 90.0 second timeout
+2024-08-13 11:48:53,906 INFO    MainThread:223756 [wandb_run.py:_on_init():2435] communicating current version
+2024-08-13 11:48:53,943 INFO    MainThread:223756 [wandb_run.py:_on_init():2444] got version response upgrade_message: "wandb version 0.17.6 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2024-08-13 11:48:53,943 INFO    MainThread:223756 [wandb_init.py:init():804] starting run threads in backend
+2024-08-13 11:48:56,619 INFO    MainThread:223756 [wandb_run.py:_console_start():2413] atexit reg
+2024-08-13 11:48:56,619 INFO    MainThread:223756 [wandb_run.py:_redirect():2255] redirect: wrap_raw
+2024-08-13 11:48:56,620 INFO    MainThread:223756 [wandb_run.py:_redirect():2320] Wrapping output streams.
+2024-08-13 11:48:56,620 INFO    MainThread:223756 [wandb_run.py:_redirect():2345] Redirects installed.
+2024-08-13 11:48:56,621 INFO    MainThread:223756 [wandb_init.py:init():847] run started, returning control to user process
+2024-08-13 11:48:58,294 INFO    MainThread:223756 [wandb_run.py:_config_callback():1382] config_cb None None {'model_size': 4455101}
+2024-08-13 11:48:58,295 INFO    MainThread:223756 [wandb_run.py:_config_callback():1382] config_cb None None {'trainable_size': 4455101}
+2024-08-13 12:09:14,309 INFO    MainThread:223756 [wandb_run.py:_finish():2107] finishing run lucazzola/NLU-part-1.2/ug8c5dj2
+2024-08-13 12:09:14,309 INFO    MainThread:223756 [wandb_run.py:_atexit_cleanup():2374] got exitcode: 0
+2024-08-13 12:09:14,309 INFO    MainThread:223756 [wandb_run.py:_restore():2352] restore
+2024-08-13 12:09:14,310 INFO    MainThread:223756 [wandb_run.py:_restore():2358] restore done
+2024-08-13 12:09:18,924 INFO    MainThread:223756 [wandb_run.py:_footer_history_summary_info():4016] rendering history
+2024-08-13 12:09:18,925 INFO    MainThread:223756 [wandb_run.py:_footer_history_summary_info():4048] rendering summary
+2024-08-13 12:09:18,929 INFO    MainThread:223756 [wandb_run.py:_footer_sync_info():3975] logging synced files

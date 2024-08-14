@@ -19,10 +19,10 @@ if __name__ == "__main__":
     lang, train_loader, val_loader, test_loader = init_data(args)
     model, optimizer, criterion_train, criterion_eval = init_modelComponents(args, lang)
     
-    param_count = get_num_parameters(model)
-    print(f"Learnable parameters: {param_count}")
-    if args.enable_logger:
-        wandb.config.update({"model_size": param_count})
+    if args.enable_logger :
+        tot_params, trainable_params = get_num_parameters(model)
+        wandb.config.update({"model_size": tot_params})
+        wandb.config.update({"trainable_size": trainable_params})
 
     # if the flag is unset perform Train + Testing, otherwise perform test only
     if not args.test_only :
@@ -31,7 +31,6 @@ if __name__ == "__main__":
             n_epochs=args.n_epochs,
             patience=3,
             clip=5,
-            ppl_milestones=[100],     # when a ppl milestone is reached (lr /= factor)
             nmt_AvSGD_enabled=args.nmt_AvSGD_enabled,
             non_monotone_int=5
         ).to(DEVICE)
@@ -45,7 +44,7 @@ if __name__ == "__main__":
 
     # Save model weights
     if args.save_model :
-        save_model(best_model, filename='model.pt')
+        save_model(best_model, filename='best_model.pt')
 
     # Close the logger
     if args.enable_logger:

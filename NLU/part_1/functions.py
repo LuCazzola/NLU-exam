@@ -19,6 +19,20 @@ from utils import PAD_TOKEN, DEVICE
 
 
 def train_step(model, data_loader, optimizer, criterion_slots, criterion_intents, clip=5):
+    """
+    Perform a single training step for the model using the provided data loader.
+
+    Args:
+        model (nn.Module): The model to be trained.
+        data_loader (DataLoader): DataLoader providing training data.
+        optimizer (torch.optim.Optimizer): Optimizer for updating model parameters.
+        criterion_slots (nn.Module): Loss function for slot predictions.
+        criterion_intents (nn.Module): Loss function for intent predictions.
+        clip (float, optional): Gradient clipping value to prevent exploding gradients. Defaults to 5.
+
+    Returns:
+        list: A list of loss values recorded during the training step.
+    """
     model.train()
     loss_array = []
     for sample in data_loader:
@@ -37,6 +51,22 @@ def train_step(model, data_loader, optimizer, criterion_slots, criterion_intents
 
 
 def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
+    """
+    Evaluate the model on the provided data loader and compute metrics.
+
+    Args:
+        model (nn.Module): The model to be evaluated.
+        data_loader (DataLoader): DataLoader providing evaluation data.
+        criterion_slots (nn.Module): Loss function for slot predictions.
+        criterion_intents (nn.Module): Loss function for intent predictions.
+        lang (object): Language object containing id2intent and id2slot mappings.
+
+    Returns:
+        tuple: A tuple containing:
+            - dict: Evaluation results for slots.
+            - dict: Classification report for intents.
+            - list: List of loss values recorded during the evaluation.
+    """
     loss_array = []
     ref_intents = []
     hyp_intents = []
@@ -88,6 +118,24 @@ def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
 
 
 def train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang, n_epochs=200, clip=5, patience=5):
+    """
+    Train the model over multiple epochs and perform evaluation with early stopping.
+
+    Args:
+        model (nn.Module): The model to be trained.
+        train_loader (DataLoader): DataLoader providing training data.
+        val_loader (DataLoader): DataLoader providing validation data.
+        optimizer (torch.optim.Optimizer): Optimizer for updating model parameters.
+        criterion_slots (nn.Module): Loss function for slot predictions.
+        criterion_intents (nn.Module): Loss function for intent predictions.
+        lang (object): Language object containing id2intent and id2slot mappings.
+        n_epochs (int, optional): Number of epochs to train. Defaults to 200.
+        clip (float, optional): Gradient clipping value to prevent exploding gradients. Defaults to 5.
+        patience (int, optional): Number of epochs to wait for improvement before stopping early. Defaults to 5.
+
+    Returns:
+        nn.Module: The best model obtained during training.
+    """
     losses_train = []
     losses_val = []
     sampled_epochs = []
@@ -124,6 +172,12 @@ INITIALIZATION FUNCTIONS
 """
 
 def init_weights(mat):
+    """
+    Initialize weights for the model parameters using specific schemes for different layer types.
+
+    Args:
+        mat (nn.Module): The model or module whose weights are to be initialized.
+    """
     for m in mat.modules():
         if type(m) in [nn.GRU, nn.LSTM, nn.RNN]:
             for name, param in m.named_parameters():
@@ -145,7 +199,20 @@ def init_weights(mat):
 
 
 def init_components (args, lang) :
+    """
+    Initialize model components including the model, optimizer, and loss functions.
 
+    Args:
+        args (argparse.Namespace): Command line arguments containing configuration parameters.
+        lang (object): Language object containing slot and intent mappings.
+
+    Returns:
+        tuple: A tuple containing:
+            - nn.Module: Initialized model.
+            - torch.optim.Optimizer: Initialized optimizer.
+            - nn.Module: Loss function for slot predictions.
+            - nn.Module: Loss function for intent predictions.
+    """
     model = ModelIAS(args.emb_size, args.hid_size, len(lang.slot2id), len(lang.intent2id), len(lang.word2id),
         n_layer=args.n_layers,
         pad_index=PAD_TOKEN,
@@ -156,14 +223,17 @@ def init_components (args, lang) :
         out_dropout=args.out_dropout
     ).to(DEVICE)
     
-    model.apply(init_weights)
+    # Load model weights if the path is passed as parameter
+    # Oterwise initialize base weights
+    if args.load_checkpoint is not None :
+        model.load_state_dict(torch.load(args.load_checkpoint))
+    else :
+        model.apply(init_weights)
 
-    if args.optimizer_type == 'Adam' :
-        optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(args.momentum, 0.999))
-    elif args.optimizer_type == 'AdamW' :
-        optimizer = optim.AdamW(model.parameters(), lr=args.lr, betas=(args.momentum, 0.999))
+    if args.optimizer_type == 'AdamW' :
+        optimizer = optim.AdamW(model.parameters(), lr=args.lr)
     elif args.optimizer_type == 'SGD' :
-        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=(args.momentum), nesterov=False)
+        optimizer = optim.SGD(model.parameters(), lr=args.lr)
     else :
         raise ValueError("Unsupported optimizer type.\n   - available choices : ASG, Adam, AdamW")
 
@@ -177,21 +247,47 @@ UTILITY
 '''
 
 def save_model(model, filename='model.pt'):
-    path = os.path.join("bin", model_name)
+    """
+    Save the model's state dictionary to a file.
+
+    Args:
+        model (nn.Module): The model to be saved.
+        filename (str, optional): Name of the file to save the model state. Defaults to 'model.pt'.
+    """
+    path = os.path.join("bin", filename)
     torch.save(model.state_dict(), path)
 
 
 def get_num_parameters(model):
-    return sum(p.numel() for p in model.parameters())
+    """
+    Calculate the total and trainable parameters of the model.
+
+    Args:
+        model (nn.Module): The model whose parameters are to be calculated.
+
+    Returns:
+        tuple: A tuple containing:
+            - int: Total number of parameters.
+            - int: Number of trainable parameters.
+    """
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return total_params, trainable_params
 
 def get_args():
+    """
+    Parse and return command line arguments for model configuration and training.
+
+    Returns:
+        argparse.Namespace: Parsed command line arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Model parameters",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     # Model args
     parser.add_argument("--emb_size", type=int, default=300, required=False, help="size of word embedding")
-    parser.add_argument("--hid_size", type=int, default=200, required=False, help="width of recurrent layers")
+    parser.add_argument("--hid_size", type=int, default=300, required=False, help="width of recurrent layers")
     parser.add_argument("--n_layers", type=int, default=1, required=False, help="number of stacked recurrent layers")
     parser.add_argument("--emb_dropout", type=float, default=0.1, required=False, help="embedding layer dropout probability (requires dropout enabled to function)")
     parser.add_argument("--hid_dropout", type=float, default=0.1, required=False, help="hidden recurrent layers dropout probability (requires dropout enabled to function)")
@@ -209,7 +305,6 @@ def get_args():
     parser.add_argument("--val_bsize", type=int, default=64, required=False, help="validation set batch size")
     parser.add_argument("--test_bsize", type=int, default=64, required=False, help="test set batch size")
     parser.add_argument("--optimizer_type", type=str, default="Adam", required=False, help="type of optimizer {SGD, Adam, AdamW}")
-    parser.add_argument("--momentum", type=float, default=0.0, required=False, help="adds momentum to the defined optimizer")
 
     # Additional control flow arguments
     parser.add_argument("--load_checkpoint", type=str, default=None, required=False, help="path to weight checkpoint to load")
@@ -221,20 +316,30 @@ def get_args():
 
 
 def init_logger(args):
+    """
+    Initialize a logger using Weights & Biases to track training and evaluation metrics.
+
+    Args:
+        args (argparse.Namespace): Command line arguments containing configuration parameters.
+    """
     # start a new wandb run to track this script
     wandb.init(
         # set the wandb project where this run will be logged
-        project="NLU-part2",
+        project="NLU-part-2.1",
 
         # track hyperparameters and run metadata
         config={
         "learning_rate": args.lr,
         "embedding_size" : args.emb_size,
         "hidden_size" : args.hid_size,
-        "n_layers" : args.n_layer,
+        "n_layers" : args.n_layers,
         "dataset": "ATIS",
         "optimizer" : args.optimizer_type,
-        "momentum" : args.momentum,
         "epochs": args.n_epochs,
+        "bidirectional" : args.bidirectional,
+        "dropout_enable" : args.dropout_enable,
+        "emb_dropout" : args.emb_dropout,
+        "hid_dropout" : args.hid_dropout,
+        "out_dropout" : args.out_dropout
         }
     )

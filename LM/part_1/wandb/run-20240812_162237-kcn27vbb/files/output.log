@@ -1,0 +1,27 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PPL: 955.607820:  13%|██████████████████████████▊                                                                                                                                                                                   | 13/100 [03:21<22:26, 15.48s/it]
+Traceback (most recent call last):
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_1/main.py", line 29, in <module>
+    best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_train, criterion_eval, n_epochs=args.n_epochs, patience=3, clip=5)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_1/functions.py", line 57, in train_loop
+    ppl_train, loss_train = train_step(model, train_loader, optimizer, criterion_train, clip)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_1/functions.py", line 35, in train_step
+    loss.backward() # Compute the gradient, deleting the computational graph
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/_tensor.py", line 522, in backward
+    torch.autograd.backward(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/autograd/__init__.py", line 266, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+KeyboardInterrupt

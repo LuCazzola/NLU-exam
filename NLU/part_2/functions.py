@@ -20,6 +20,21 @@ from utils import PAD_TOKEN, DEVICE
 torch.autograd.set_detect_anomaly(True)
 
 def train_step(model, data_loader, optimizer, criterion_slots, criterion_intents, lang, clip=5):
+    """
+    Perform a single training step.
+
+    Args:
+        model (torch.nn.Module): The model to train.
+        data_loader (DataLoader): DataLoader for training data.
+        optimizer (torch.optim.Optimizer): Optimizer for model parameters.
+        criterion_slots (nn.Module): Loss function for slot prediction.
+        criterion_intents (nn.Module): Loss function for intent prediction.
+        lang (Lang): Language object for token mappings.
+        clip (float, optional): Gradient clipping value. Defaults to 5.
+
+    Returns:
+        list: List of loss values for each batch.
+    """
     model.train()
     loss_array = []
     for sample in data_loader:
@@ -44,6 +59,22 @@ def train_step(model, data_loader, optimizer, criterion_slots, criterion_intents
 
 
 def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
+    """
+    Evaluate the model on validation or test data.
+
+    Args:
+        model (torch.nn.Module): The model to evaluate.
+        data_loader (DataLoader): DataLoader for evaluation data.
+        criterion_slots (nn.Module): Loss function for slot prediction.
+        criterion_intents (nn.Module): Loss function for intent prediction.
+        lang (Lang): Language object for token mappings.
+
+    Returns:
+        dict: Evaluation results including slot F1 score and intent accuracy.
+        dict: Classification report for intents.
+        list: List of loss values for each batch.
+        list: List of subtoken weights.
+    """
     loss_array = []
     ref_intents = []
     hyp_intents = []
@@ -109,6 +140,24 @@ def eval_loop(model, data_loader, criterion_slots, criterion_intents, lang):
 
 
 def train_loop(model, train_loader, val_loader, optimizer, criterion_slots, criterion_intents, lang, n_epochs=200, clip=5, patience=5):
+    """
+    Main training loop with validation.
+
+    Args:
+        model (torch.nn.Module): The model to train.
+        train_loader (DataLoader): DataLoader for training data.
+        val_loader (DataLoader): DataLoader for validation data.
+        optimizer (torch.optim.Optimizer): Optimizer for model parameters.
+        criterion_slots (nn.Module): Loss function for slot prediction.
+        criterion_intents (nn.Module): Loss function for intent prediction.
+        lang (Lang): Language object for token mappings.
+        n_epochs (int, optional): Number of epochs. Defaults to 200.
+        clip (float, optional): Gradient clipping value. Defaults to 5.
+        patience (int, optional): Early stopping patience. Defaults to 5.
+
+    Returns:
+        torch.nn.Module: Best model after training.
+    """
     losses_train = []
     losses_val = []
     sampled_epochs = []
@@ -151,15 +200,30 @@ INITIALIZATION FUNCTIONS
 """
 
 def init_components (args, lang) :
+    """
+    Initialize model, optimizer, and loss functions.
 
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+        lang (Lang): Language object for token mappings.
+
+    Returns:
+        tuple: Model, optimizer, slot loss function, and intent loss function.
+    """
     model = ModelIAS(len(lang.slot2id), len(lang.intent2id), len(lang.word2id),
+        finetune_bert=args.finetune_bert,
+        bert_version=args.bert_version,
         dropout_enable=args.dropout_enable,
-        merger_enable=args.merger_enable,
         int_dropout=args.int_dropout,
         slot_dropout=args.slot_dropout,
-        bert_version=args.bert_version,
-        num_heads=args.num_heads
+        merger_enable=args.merger_enable,
+        num_heads=args.num_heads,
     ).to(DEVICE)
+
+    # Load model weights if the path is passed as parameter
+    # Oterwise initialize base weights
+    if args.load_checkpoint is not None :
+        model.load_state_dict(torch.load(args.load_checkpoint))
 
     if args.optimizer_type == 'Adam' :
         optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(args.momentum, 0.999))
@@ -181,6 +245,17 @@ UTILITY
 '''
 
 def set_bert_input_and_slots (sample, lang, tokenizer):
+    """
+    Prepare BERT inputs and slot labels for training or evaluation.
+
+    Args:
+        sample (dict): Sample containing utterances, slots, and intents.
+        lang (Lang): Language object for token mappings.
+        tokenizer: BERT tokenizer.
+
+    Returns:
+        tuple: BERT input tensors, slot tensors, and special tokens.
+    """
     # convert ids to words and tokenize them all at once
     sentences = [[lang.id2word[y] for y in x.int().tolist()] for x in sample['utterance']]
     sentences = [" ".join(x) for x in sentences]
@@ -221,7 +296,17 @@ def set_bert_input_and_slots (sample, lang, tokenizer):
     return bert_input, bert_slots, special_tokens
 
 def get_subtok_poses (special_tokens, batch_size):
-    subtoken_poses = special_tokens.copy()
+    """
+    Get positions of sub-tokens for each batch.
+
+    Args:
+        special_tokens (dict): Dictionary of special token positions.
+        batch_size (int): Size of the batch.
+
+    Returns:
+        dict: Subtoken positions for each batch.
+    """
+    subtoken_poses = copy.deepcopy(special_tokens)
     for batch_id in range(batch_size):
         subtoken_poses[batch_id].discard(0)                             # remove [CLS] token reference
         subtoken_poses[batch_id].discard(max(subtoken_poses[batch_id])) # remove [SEP] token reference
@@ -230,28 +315,50 @@ def get_subtok_poses (special_tokens, batch_size):
 
 
 def save_model(model, filename='model.pt'):
-    path = os.path.join("bin", model_name)
+    """
+    Save the model's state dictionary.
+
+    Args:
+        model (torch.nn.Module): The model to save.
+        filename (str, optional): Filename to save the model. Defaults to 'model.pt'.
+    """
+    path = os.path.join("bin", filename)
     torch.save(model.state_dict(), path)
 
 def get_num_parameters(model):
+    """
+    Get the number of parameters in the model.
+
+    Args:
+        model (torch.nn.Module): The model to inspect.
+
+    Returns:
+        tuple: Total number of parameters and number of trainable parameters.
+    """
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     return total_params, trainable_params
 
 def get_args():
+    """
+    Parse command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Model parameters",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     # Model args
     parser.add_argument("--bert_version", type=str, default="bert-base-uncased", required=False, help="bert version {bert-base-uncased, bert-base-cased}")
+    parser.add_argument("--finetune_bert", default=False, action="store_true", required=False, help="if set BERT is finetuned, otherwise it's kept frozen")
+    # component flags
+    parser.add_argument("--merger_enable", default=False, action="store_true", required=False, help="enables merger component using self attention")
     parser.add_argument("--num_heads", type=int, default=1, required=False, help="number of attention heads")
+    parser.add_argument("--dropout_enable", default=False, action="store_true", required=False, help="enables dropout")
     parser.add_argument("--int_dropout", type=float, default=0.1, required=False, help="intents dropout probability")
     parser.add_argument("--slot_dropout", type=float, default=0.1, required=False, help="slots dropout probability")
-
-    # component flags
-    parser.add_argument("--dropout_enable", default=False, action="store_true", required=False, help="enables dropout")
-    parser.add_argument("--merger_enable", default=False, action="store_true", required=False, help="enables merger component using self attention")
 
     # Training/Inference related args
     parser.add_argument("--lr", type=float, default=0.0001, required=False, help="learning rate")
@@ -273,6 +380,12 @@ def get_args():
 
 
 def init_logger(args):
+    """
+    Initialize logging with Weights & Biases.
+
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+    """
     # start a new wandb run to track this script
     wandb.init(
         # set the wandb project where this run will be logged
@@ -285,5 +398,13 @@ def init_logger(args):
         "optimizer" : args.optimizer_type,
         "momentum" : args.momentum,
         "epochs": args.n_epochs,
+        "dropout_enable": args.dropout_enable,
+        "int_dropout": args.int_dropout if args.dropout_enable else 0,
+        "slot_dropout": args.slot_dropout if args.dropout_enable else 0,
+        "bert_version": args.bert_version,
+        "fine_tune_bert": args.finetune_bert,
+        "merger_enable": args.merger_enable,
+        "n_attention_heads": args.num_heads if args.merger_enable else 0
         }
+
     )

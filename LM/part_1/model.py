@@ -11,34 +11,42 @@ import numpy as np
 
 class LM_RNN(nn.Module):
     """
-    Language Model Recurrent Neural Network (LM_RNN) class that defines the architecture of the model.
-    
-    Args:
-        emb_size (int): Size of the embedding vectors.
-        hidden_size (int): Number of features in the hidden state.
-        output_size (int): Size of the output vocabulary.
-        pad_index (int, optional): Index of the padding token. Default is 0.
-        out_dropout (float, optional): Dropout probability for the output layer. Default is 0.1.
-        hid_dropout (float, optional): Dropout probability for the rnn hidden layer. Default is 0.0.
-        emb_dropout (float, optional): Dropout probability for the embedding layer. Default is 0.1.
-        n_layers (int, optional): Number of recurrent layers. Default is 1.
-        recLayer_type (str, optional): Type of recurrent layer ('vanilla' or 'LSTM'). Default is 'vanilla'.
-        dropout_enabled (bool, optional): Flag to enable dropout layers. Default is False.
-    """
+    A RNN based model for language modeling.
 
-    def __init__(self, emb_size, hidden_size, output_size, pad_index=0, emb_dropout=0.1, hid_dropout=0.0, out_dropout=0.1, n_layers=1, recLayer_type='vanilla', dropout_enabled=False):
+    Args:
+        emb_size (int): Size of the word embeddings.
+        hidden_size (int): Number of features in the hidden state of the RNN.
+        output_size (int): Size of the output vocabulary.
+        pad_index (int, optional): Padding index for the embedding layer. Default is 0.
+        emb_dropout (float, optional): Dropout probability for the embedding layer. Default is 0.1.
+        hid_dropout (float, optional): Dropout probability for the recurrent layer. Default is 0.1.
+        out_dropout (float, optional): Dropout probability for the output layer. Default is 0.1.
+        n_layers (int, optional): Number of recurrent layers. Default is 1.
+        recLayer_type (str, optional): Type of recurrent cell used. Options are 'vanilla', 'LSTM', or 'GRU'. Default is 'vanilla'.
+        dropout_enabled (bool, optional): Flag to enable or disable dropout layers. Default is False.
+    """
+    def __init__(self, emb_size, hidden_size, output_size, pad_index=0, emb_dropout=0.1, hid_dropout=0.1, out_dropout=0.1, n_layers=1, recLayer_type='vanilla', dropout_enabled=False):
         super(LM_RNN, self).__init__()
         # Token ids to vectors, we will better see this in the next lab 
         self.embedding = nn.Embedding(output_size, emb_size, padding_idx=pad_index)
+
+        # Dropout layers are zeroed if flag '--dropout_enabled' is unset
+        if not dropout_enabled :
+            emb_dropout = 0.0
+            hid_dropout = 0.0
+            out_dropout = 0.0
 
         if recLayer_type == 'vanilla' :
             # Pytorch's RNN layer: https://pytorch.org/docs/stable/generated/torch.nn.RNN.html
             self.rnn = nn.RNN(emb_size, hidden_size, n_layers, dropout=hid_dropout, bidirectional=False, batch_first=True)
         elif recLayer_type == 'LSTM' :
              # Pytorch's LSTM layer: https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html
-            self.rnn = nn.LSTM(emb_size, hidden_size, num_layers=1, bidirectional=False, batch_first=True)
+            self.rnn = nn.LSTM(emb_size, hidden_size, n_layers, dropout=hid_dropout, bidirectional=False, batch_first=True)
+        elif recLayer_type == 'GRU' :
+            # Pytorch's GRU layer: https://pytorch.org/docs/stable/generated/torch.nn.GRU.html
+            self.rnn = nn.GRU(emb_size, hidden_size, n_layers, dropout=hid_dropout, bidirectional=False, batch_first=True)
         else :
-            print("Unsupported Recurrent Cell type.\n   - available choices : {vanilla, LSTM}")
+            print("Unsupported Recurrent Cell type.\n   - available choices : {vanilla, LSTM, GRU}")
             exit()
 
         # Dropout layers are added only if it's set the flag '--dropout_enabled'
@@ -53,6 +61,15 @@ class LM_RNN(nn.Module):
         self.output = nn.Linear(hidden_size, output_size)
         
     def forward(self, input_sequence):
+        """
+        Forward pass through the model.
+
+        Args:
+            input_sequence (torch.Tensor): Input tensor containing token IDs.
+
+        Returns:
+            torch.Tensor: Output tensor with predictions for each token in the sequence.
+        """
         # generate word embedding for input sequence
         emb = self.embedding(input_sequence)
 

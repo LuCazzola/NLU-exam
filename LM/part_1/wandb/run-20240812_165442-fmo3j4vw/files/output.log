@@ -1,0 +1,23 @@
+  0%|                                                                                                                                                                                                                                        | 0/100 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_1/main.py", line 29, in <module>
+    best_model = train_loop(model, train_loader, val_loader, optimizer, criterion_train, criterion_eval, n_epochs=args.n_epochs, patience=3, clip=5)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_1/functions.py", line 57, in train_loop
+    ppl_train, loss_train = train_step(model, train_loader, optimizer, criterion_train, clip)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_1/functions.py", line 31, in train_step
+    output = model(sample['source'])
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_1/model.py", line 51, in forward
+    emb = self.embedding(input_sequence)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/modules/sparse.py", line 163, in forward
+    return F.embedding(
+  File "/home/zeus/miniconda3/envs/cloudspace/lib/python3.10/site-packages/torch/nn/functional.py", line 2237, in embedding
+    return torch.embedding(weight, input, padding_idx, scale_grad_by_freq, sparse)
+KeyboardInterrupt

@@ -2,26 +2,26 @@
 
 # Parameters for the model
 EMB_SIZE=300               # Size of the word embedding
-HID_SIZE=200               # Width of recurrent layers
-RECLAYER_TYPE="vanilla"    # (vanilla, LSTM) : Type of recurrent cell
+HID_SIZE=300               # Width of recurrent layers
+RECLAYER_TYPE="LSTM"       # (vanilla, LSTM, GRU) : Type of recurrent cell
 N_LAYERS=1                 # number of stacked recurrent layers
 DROPOUT_ENABLED=true       # (true) enables dropout
 EMB_DROPOUT=0.1            # embedding layer dropout probability (requirese DROPOUT_ENABLED=true to have effect)
-HID_DROPOUT=0.0            # hidden layers dropout probability
+HID_DROPOUT=0.1            # hidden layers dropout probability
 OUT_DROPOUT=0.1            # rnn output layer dropout probability (requirese DROPOUT_ENABLED=true to have effect)
 
 # Training settings
+OPTIMIZER_TYPE="AdamW"     # (SGD, AdamW) : Type of optimizer 
 LR=0.0001                  # Learning rate
 N_EPOCHS=100               # Number of epochs
 TRAIN_BSIZE=64             # Training set batch size
 VAL_BSIZE=128              # Validation set batch size
 TEST_BSIZE=128             # Test set batch size
-OPTIMIZER_TYPE="SGD"       # (SGD, AdamW) : Type of optimizer 
 
 # Additional control flow arguments
 LOAD_CHECKPOINT="None"     # Path to weight checkpoint to load (set to "None" if not used)
-TEST_ONLY=false             # (true/false) : Whether to perform inference on test set only or train the model + perform testing
-SAVE_MODEL=false           # (true/false) : Whether to save the model
+TEST_ONLY=false            # (true/false) : Whether to perform inference on test set only or train the model + perform testing
+SAVE_MODEL=false            # (true/false) : Whether to save the model
 ENABLE_LOGGER=false        # (true/false) : Whether to enable logging to wandb
 
 # Construct the command with the arguments

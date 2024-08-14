@@ -7,6 +7,7 @@ import math
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import copy
+import os
 # pytorch modules
 import torch.optim as optim
 # Logging
@@ -22,17 +23,18 @@ MODEL TRAINING / INFERENCE
 
 def train_step(model, data_loader, optimizer, criterion, clip):
     """
-    Perform a single training step on the given model using the provided data loader, optimizer, and criterion.
-    
+    Perform a single training step.
+
     Args:
         model (torch.nn.Module): The RNN model to be trained.
-        data_loader (torch.utils.data.DataLoader): DataLoader providing the training data.
+        data_loader (torch.utils.data.DataLoader): DataLoader for the training data.
         optimizer (torch.optim.Optimizer): Optimizer for updating the model parameters.
         criterion (torch.nn.Module): Loss function.
-        clip (float): Gradient clipping value.
-    
+        clip (float): Maximum norm of the gradients for clipping.
+
     Returns:
-        tuple: Perplexity and average loss of the training step.
+        float: Perplexity of the model on the training data.
+        float: Average loss over the training data.
     """
     model.train()
     loss_array = []
@@ -57,21 +59,21 @@ def train_step(model, data_loader, optimizer, criterion, clip):
 
 def train_loop(model, train_loader, val_loader, optimizer, criterion_train, criterion_val, n_epochs=100, patience=3, clip=5):
     """
-    Execute the training loop for the specified number of epochs, incorporating early stopping based on validation performance.
-    
+    Perform the training loop over multiple epochs with early stopping.
+
     Args:
         model (torch.nn.Module): The RNN model to be trained.
-        train_loader (torch.utils.data.DataLoader): DataLoader providing the training data.
-        val_loader (torch.utils.data.DataLoader): DataLoader providing the validation data.
+        train_loader (torch.utils.data.DataLoader): DataLoader for the training data.
+        val_loader (torch.utils.data.DataLoader): DataLoader for the validation data.
         optimizer (torch.optim.Optimizer): Optimizer for updating the model parameters.
         criterion_train (torch.nn.Module): Loss function for training.
         criterion_val (torch.nn.Module): Loss function for validation.
-        n_epochs (int, optional): Number of epochs to train the model. Default is 100.
-        patience (int, optional): Number of epochs with no improvement after which training will be stopped. Default is 3.
-        clip (float, optional): Gradient clipping value. Default is 5.
-    
+        n_epochs (int, optional): Number of epochs to train. Default is 100.
+        patience (int, optional): Number of epochs to wait for improvement before early stopping. Default is 3.
+        clip (float, optional): Maximum norm of the gradients for clipping. Default is 5.
+
     Returns:
-        torch.nn.Module: The best model based on validation performance.
+        torch.nn.Module: The best model based on validation perplexity.
     """
     losses_train = []
     losses_val = []
@@ -110,15 +112,16 @@ def train_loop(model, train_loader, val_loader, optimizer, criterion_train, crit
 
 def eval_loop(model, data_loader, criterion):
     """
-    Evaluate the model on the given data loader using the specified criterion.
-    
+    Perform evaluation on the given data.
+
     Args:
         model (torch.nn.Module): The RNN model to be evaluated.
-        data_loader (torch.utils.data.DataLoader): DataLoader providing the evaluation data.
-        criterion (torch.nn.Module): Loss function for evaluation.
-    
+        data_loader (torch.utils.data.DataLoader): DataLoader for the evaluation data.
+        criterion (torch.nn.Module): Loss function.
+
     Returns:
-        tuple: Perplexity and average loss of the evaluation step.
+        float: Perplexity of the model on the evaluation data.
+        float: Average loss over the evaluation data.
     """
     model.eval()
     loss_to_return = []
@@ -144,10 +147,10 @@ INITIALIZATION FUNCTIONS
 
 def init_weights(mat):
     """
-    Initialize the weights of the model using Xavier uniform initialization for input-hidden weights and orthogonal initialization for hidden-hidden weights.
-    
+    Initialize weights of the model.
+
     Args:
-        mat (torch.nn.Module): The RNN model whose weights need to be initialized.
+        mat (torch.nn.Module): The model or layer whose weights are to be initialized.
     """
     for m in mat.modules():
         if type(m) in [nn.GRU, nn.LSTM, nn.RNN]:
@@ -171,14 +174,17 @@ def init_weights(mat):
 
 def init_modelComponents (args, lang) :
     """
-    Initialize the model, optimizer, and loss functions based on the provided arguments and language settings.
-    
+    Initialize model components including the model, optimizer, and loss functions.
+
     Args:
-        args (argparse.Namespace): Parsed command-line arguments.
-        lang (object): Language object containing word-to-id mappings.
-    
+        args (argparse.Namespace): Arguments containing model and training hyperparameters.
+        lang: Language object containing word-to-index mappings.
+
     Returns:
-        tuple: Initialized model, optimizer, training criterion, and evaluation criterion.
+        torch.nn.Module: The initialized RNN model.
+        torch.optim.Optimizer: The optimizer for training the model.
+        torch.nn.Module: The training loss function.
+        torch.nn.Module: The evaluation loss function.
     """
     # Load the model
     model = LM_RNN(
@@ -193,7 +199,7 @@ def init_modelComponents (args, lang) :
         recLayer_type=args.recLayer_type,
         dropout_enabled=args.dropout_enabled).to(DEVICE)
 
-    # Load model weights are passed as parameters load them
+    # Load model weights if the path is passed as parameter
     # Oterwise initialize base weights
     if args.load_checkpoint is not None :
         model.load_state_dict(torch.load(args.load_checkpoint))
@@ -216,26 +222,41 @@ def init_modelComponents (args, lang) :
 
     return model, optimizer, criterion_train, criterion_eval
 
-
 """
 UTILITY
 """
 
+def get_num_parameters(model):
+    """
+    Get the total and trainable number of parameters in the model.
+
+    Args:
+        model (torch.nn.Module): The RNN model.
+
+    Returns:
+        int: Total number of parameters.
+        int: Number of trainable parameters.
+    """
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return total_params, trainable_params
+
+
 def save_model(model, filename='model.pt'):
     """
-    Save the model's state dictionary to a specified file.
-    
+    Save the model's state to a file.
+
     Args:
         model (torch.nn.Module): The RNN model to be saved.
-        filename (str, optional): Name of the file to save the model. Default is 'model.pt'.
+        filename (str, optional): The filename for the saved model. Default is 'model.pt'.
     """
-    path = 'bin/'+filename
+    path = os.path.join("bin", filename)
     torch.save(model.state_dict(), path)
 
 def get_args():
     """
-    Parse and return the command-line arguments for model configuration and training.
-    
+    Parse and return command-line arguments for the model.
+
     Returns:
         argparse.Namespace: Parsed command-line arguments.
     """
@@ -248,10 +269,10 @@ def get_args():
     parser.add_argument("--hid_size", type=int, default=200, required=False, help="width of recurrent layers")
     parser.add_argument("--recLayer_type", type=str, default="vanilla", required=False, help="type of recurrent cell {vanilla, LSTM, GRU}")
     parser.add_argument("--n_layers", type=int, default=1, required=False, help="number of stacked recurrent layers")
+    parser.add_argument("--dropout_enabled", default=False, action="store_true", required=False, help="adds 2 dropout layers to the model: one after the embedding layer, one before the last linear layer")
     parser.add_argument("--emb_dropout", type=float, default=0.1, required=False, help="embedding layer dropout probability (requires dropout enabled to function)")
     parser.add_argument("--hid_dropout", type=float, default=0.1, required=False, help="hidden recurrent layers dropout probability (requires dropout enabled to function)")
     parser.add_argument("--out_dropout", type=float, default=0.1, required=False, help="rnn output layer dropout probability (requires dropout enabled to function)")
-    parser.add_argument("--dropout_enabled", default=False, action="store_true", required=False, help="adds 2 dropout layers to the model: one after the embedding layer, one before the last linear layer")
 
     # Training/Inference related args
     parser.add_argument("--lr", type=float, default=0.0001, required=False, help="learning rate")
@@ -272,23 +293,28 @@ def get_args():
 
 def init_logger(args):
     """
-    Initialize the Weights and Biases (wandb) logger for tracking experiments.
-    
+    Initialize the Weights & Biases (wandb) logger.
+
     Args:
-        args (argparse.Namespace): Parsed command-line arguments.
+        args (argparse.Namespace): Arguments containing logging configurations.
     """
     # start a new wandb run to track this script
     wandb.init(
         # set the wandb project where this run will be logged
-        project="NLU-part1",
+        project="NLU-part-1.1",
 
         # track hyperparameters and run metadata
         config={
-        "learning_rate": args.lr,
-        "embedding_size" : args.emb_size,
-        "hidden_size" : args.hid_size,
-        "architecture": args.RNN_type,
+        "recLayer_type": args.recLayer_type,
         "dataset": "PennTreeBank",
         "epochs": args.n_epochs,
+        "learning_rate": args.lr,
+        "optimizer": args.optimizer_type,
+        "embedding_size" : args.emb_size,
+        "hidden_size" : args.hid_size,
+        "dropout_enabled": args.dropout_enabled,
+        "embedding_dropout": args.emb_dropout,
+        "hidden_dropout": args.hid_dropout,
+        "output_dropout": args.out_dropout,
         }
     )

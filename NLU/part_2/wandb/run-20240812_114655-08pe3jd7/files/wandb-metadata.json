@@ -1,0 +1,82 @@
+{
+    "os": "Linux-5.15.0-1064-aws-x86_64-with-glibc2.31",
+    "python": "3.10.10",
+    "heartbeatAt": "2024-08-12T11:46:55.374109",
+    "startedAt": "2024-08-12T11:46:55.057367",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--bert_version",
+        "bert-base-uncased",
+        "--num_heads",
+        "4",
+        "--int_dropout",
+        "0.1",
+        "--slot_dropout",
+        "0.1",
+        "--lr",
+        "0.00005",
+        "--n_epochs",
+        "30",
+        "--runs",
+        "3",
+        "--train_bsize",
+        "128",
+        "--val_bsize",
+        "64",
+        "--test_bsize",
+        "64",
+        "--optimizer_type",
+        "AdamW",
+        "--momentum",
+        "0.9",
+        "--finetune_bert",
+        "--dropout_enable",
+        "--enable_logger"
+    ],
+    "state": "running",
+    "program": "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py",
+    "codePathLocal": "main.py",
+    "codePath": "main.py",
+    "host": "ip-10-192-12-120",
+    "username": "zeus",
+    "executable": "/home/zeus/miniconda3/envs/cloudspace/bin/python",
+    "cpu_count": 2,
+    "cpu_count_logical": 4,
+    "cpu_freq": {
+        "current": 2400.0,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2400.0,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2400.0,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2400.0,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2400.0,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 387.4823341369629,
+            "used": 32.187747955322266
+        }
+    },
+    "memory": {
+        "total": 15.337413787841797
+    }
+}

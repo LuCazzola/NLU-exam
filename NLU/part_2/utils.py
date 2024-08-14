@@ -22,6 +22,15 @@ CLASSES
 """
 
 class Lang():
+    """
+    Language class for vocabulary and label mappings.
+
+    Args:
+        words (list): List of words in the dataset.
+        intents (list): List of intents in the dataset.
+        slots (list): List of slots in the dataset.
+        cutoff (int, optional): Frequency cutoff for words. Defaults to 0.
+    """
     def __init__(self, words, intents, slots, cutoff=0):
         self.word2id = self.w2id(words, cutoff=cutoff, unk=True)
         self.slot2id = self.lab2id(slots)
@@ -50,6 +59,14 @@ class Lang():
 
 
 class IntentsAndSlots (data.Dataset):
+    """
+    Dataset for joint intent-slots learning.
+
+    Args:
+        dataset (list): List of data entries.
+        lang (Lang): Instance of the Lang class for mappings.
+        unk (str, optional): 'Unknown' token. Defaults to 'unk'.
+    """
     # Mandatory methods are __init__, __len__ and __getitem__
     def __init__(self, dataset, lang, unk='unk'):
         self.utterances = []
@@ -79,9 +96,29 @@ class IntentsAndSlots (data.Dataset):
     # Auxiliary methods
     
     def mapping_lab(self, data, mapper):
+        """
+        Map labels to IDs.
+
+        Args:
+            data (list): List of labels.
+            mapper (dict): Mapping from labels to IDs.
+
+        Returns:
+            list: List of IDs corresponding to the labels.
+        """
         return [mapper[x] if x in mapper else mapper[self.unk] for x in data]
     
     def mapping_seq(self, data, mapper): # Map sequences to number
+        """
+        Map sequences of words to IDs.
+
+        Args:
+            data (list): List of sequences (utterances).
+            mapper (dict): Mapping from words to IDs.
+
+        Returns:
+            list: List of sequences mapped to IDs.
+        """
         res = []
         for seq in data:
             tmp_seq = []
@@ -99,16 +136,30 @@ UTILITY
 """
 
 def load_data(path):
-    '''
-        input: path/to/data
-        output: json 
-    '''
+    """
+    Load data from a JSON file.
+
+    Args:
+        path (str): Path to the JSON file.
+
+    Returns:
+        list: Loaded dataset.
+    """
     dataset = []
     with open(path) as f:
         dataset = json.loads(f.read())
     return dataset
 
 def collate_fn(data):
+    """
+    Collate function for batching data.
+
+    Args:
+        data (list): List of samples.
+
+    Returns:
+        dict: Batches of data with padded sequences and lengths.
+    """
     def merge(sequences):
         '''
         merge from batch * sent_len to batch * max_len 
@@ -153,7 +204,15 @@ INITIALIZERS
 """
 
 def init_data(args):
+    """
+    Initialize datasets and dataloaders.
 
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+
+    Returns:
+        tuple: Language object, train dataloader, validation dataloader, test dataloader.
+    """
     tmp_train_raw = load_data(os.path.join('dataset','ATIS','train.json'))
     portion = 0.10
 

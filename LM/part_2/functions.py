@@ -6,6 +6,7 @@ Module for training and evaluating a recurrent neural network (RNN) model.
 import math
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import os
 import copy
 import numpy as np
 # pytorch modules
@@ -24,7 +25,20 @@ MODEL TRAINING / INFERENCE
 """
 
 def train_step(model, data_loader, optimizer, criterion, clip):
+    """
+    Perform a single training step for the model.
 
+    Args:
+        model (nn.Module): The RNN model to train.
+        data_loader (DataLoader): DataLoader for the training dataset.
+        optimizer (torch.optim.Optimizer): Optimizer to use for training.
+        criterion (nn.Module): Loss function to use for training.
+        clip (float): Gradient clipping value.
+
+    Returns:
+        float: Perplexity of the model on the training data.
+        float: Average loss of the model on the training data.
+    """
     model.train()
     loss_array = []
     number_of_tokens = []
@@ -45,8 +59,26 @@ def train_step(model, data_loader, optimizer, criterion, clip):
     return ppl, loss_to_return
 
 
-def train_loop(model, train_loader, val_loader, optimizer, criterion_train, criterion_val, n_epochs=100, patience=3, clip=5, ppl_milestones=[140, 120, 100], nmt_AvSGD_enabled=False, non_monotone_int=5):
+def train_loop(model, train_loader, val_loader, optimizer, criterion_train, criterion_val, n_epochs=100, patience=3, clip=5, nmt_AvSGD_enabled=False, non_monotone_int=5):
+    """
+    Train the model over multiple epochs and evaluate performance on validation data.
 
+    Args:
+        model (nn.Module): The RNN model to train.
+        train_loader (DataLoader): DataLoader for the training dataset.
+        val_loader (DataLoader): DataLoader for the validation dataset.
+        optimizer (torch.optim.Optimizer): Optimizer to use for training.
+        criterion_train (nn.Module): Loss function for training.
+        criterion_val (nn.Module): Loss function for validation.
+        n_epochs (int, optional): Number of epochs to train. Default is 100.
+        patience (int, optional): Number of epochs with no improvement to wait before stopping. Default is 3.
+        clip (float, optional): Gradient clipping value. Default is 5.
+        nmt_AvSGD_enabled (bool, optional): Flag to enable non-monotonic AvSGD. Default is False.
+        non_monotone_int (int, optional): Minimum number of epochs to monitor for non-monotonic trigger. Default is 5.
+
+    Returns:
+        nn.Module: The best model obtained during training.
+    """
     ppls_train = []
     ppls_val =[]
     sampled_epochs = []
@@ -105,11 +137,6 @@ def train_loop(model, train_loader, val_loader, optimizer, criterion_train, crit
                 for p in model.parameters():
                     p.data = model_params_bckp[p].clone()
 
-            # when a perplexity milestone is reachd divide learning rate by a costant factor
-            if len(ppl_milestones) != 0:
-                if ppl_milestones[0] >= ppl_val :
-                    optimizer.param_groups[0]['lr'] /= 10.
-                    _ = ppl_milestones.pop(0)
 
             # Trigger condition to switch optimizer
             if nmt_AvSGD_enabled and type(optimizer).__name__ == 'SGD' and not nm_trigger_flag and epoch > non_monotone_int and ppl_val > min(ppls_val[:-non_monotone_int]) :
@@ -123,7 +150,18 @@ def train_loop(model, train_loader, val_loader, optimizer, criterion_train, crit
     return best_model
 
 def eval_loop(model, data_loader, criterion):
+    """
+    Evaluate the model on the given data.
 
+    Args:
+        model (nn.Module): The RNN model to evaluate.
+        data_loader (DataLoader): DataLoader for the evaluation dataset.
+        criterion (nn.Module): Loss function for evaluation.
+
+    Returns:
+        float: Perplexity of the model on the evaluation data.
+        float: Average loss of the model on the evaluation data.
+    """
     model.eval()
     loss_to_return = []
     loss_array = []
@@ -146,7 +184,12 @@ INITIALIZATION FUNCTIONS
 """
 
 def init_weights(mat):
+    """
+    Initialize the weights of the model.
 
+    Args:
+        mat (nn.Module): The model to initialize.
+    """
     for m in mat.modules():
         if type(m) in [nn.GRU, nn.LSTM, nn.RNN]:
             for name, param in m.named_parameters():
@@ -168,7 +211,16 @@ def init_weights(mat):
 
 
 def init_modelComponents (args, lang) :
+    """
+    Initialize the model components, including the model, optimizer, and loss functions.
 
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+        lang (Lang): Language object containing vocabulary information.
+
+    Returns:
+        tuple: Model, optimizer, training criterion, and evaluation criterion.
+    """
     # Load the model
     model = LM_RNN(
         args.emb_size,
@@ -183,7 +235,7 @@ def init_modelComponents (args, lang) :
         var_dropout=args.var_dropout,
         weight_tying=args.weight_tying).to(DEVICE)
     
-    # Load model weights are passed as parameters load them
+    # Load model weights if the path is passed as parameter
     # Oterwise initialize base weights
     if args.load_checkpoint is not None :
         model.load_state_dict(torch.load(args.load_checkpoint))
@@ -212,17 +264,39 @@ UTILITY
 """
 
 def save_model(model, filename='model.pt'):
+    """
+    Save the model's state dictionary to a file.
 
-    path = 'bin/'+filename
+    Args:
+        model (nn.Module): The model to save.
+        filename (str, optional): Name of the file to save the model to. Default is 'model.pt'.
+    """
+    path = os.path.join("bin", filename)
     torch.save(model.state_dict(), path)
 
 
 def get_num_parameters(model):
-    return sum(p.numel() for p in model.parameters())
+    """
+    Get the total and trainable parameters of the model.
+
+    Args:
+        model (nn.Module): The model to inspect.
+
+    Returns:
+        tuple: Total number of parameters and number of trainable parameters.
+    """
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return total_params, trainable_params
     
 
 def get_args():
+    """
+    Parse command-line arguments.
 
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Model parameters",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -230,7 +304,7 @@ def get_args():
     # Model args
     parser.add_argument("--emb_size", type=int, default=300, required=False, help="size of word embedding")
     parser.add_argument("--hid_size", type=int, default=200, required=False, help="width of recurrent layers")
-    parser.add_argument("--recLayer_type", type=str, default="LSTM", required=False, help="type of recurrent cell {LSTM}")
+    parser.add_argument("--recLayer_type", type=str, default="LSTM", required=False, help="type of recurrent cell {LSTM, GRU}")
     parser.add_argument("--n_layers", type=int, default=1, required=False, help="number of stacked recurrent layers")
     parser.add_argument("--emb_dropout", type=float, default=0.1, required=False, help="embedding layer dropout probability (requires dropout enabled to function)")
     parser.add_argument("--hid_dropout", type=float, default=0.1, required=False, help="hidden recurrent layers dropout probability (requires dropout enabled to function)")
@@ -259,10 +333,16 @@ def get_args():
 
 
 def init_logger(args):
+    """
+    Initialize the logger (wandb) for tracking experiments.
+
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+    """
     # start a new wandb run to track this script
     wandb.init(
         # set the wandb project where this run will be logged
-        project="NLU-part1",
+        project="NLU-part-1.2",
 
         # track hyperparameters and run metadata
         config={
@@ -272,5 +352,12 @@ def init_logger(args):
         "architecture": args.recLayer_type,
         "dataset": "PennTreeBank",
         "epochs": args.n_epochs,
+        "embedding_dropout": args.emb_dropout,
+        "hidden_dropout": args.hid_dropout,
+        "output_dropout": args.out_dropout,
+        "optimizer": args.optimizer_type,
+        "weight_tying": args.weight_tying,
+        "var_dropout": args.var_dropout,
+        "nmt_AvSGD_enabled": args.nmt_AvSGD_enabled
         }
     )

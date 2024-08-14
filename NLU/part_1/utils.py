@@ -22,6 +22,15 @@ CLASSES
 """
 
 class Lang():
+    """
+    Class to handle language-related mappings for words, slots, and intents.
+
+    Args:
+        words (list of str): List of words in the corpus.
+        intents (list of str): List of intent labels.
+        slots (list of str): List of slot labels.
+        cutoff (int, optional): Minimum frequency of words to be included in vocabulary. Defaults to 0.
+    """
     def __init__(self, words, intents, slots, cutoff=0):
         self.word2id = self.w2id(words, cutoff=cutoff, unk=True)
         self.slot2id = self.lab2id(slots)
@@ -50,7 +59,14 @@ class Lang():
 
 
 class IntentsAndSlots (data.Dataset):
-    # Mandatory methods are __init__, __len__ and __getitem__
+    """
+    Dataset class for handling intent and slot classification tasks.
+
+    Args:
+        dataset (list of dict): List of samples, where each sample is a dictionary containing 'utterance', 'slots', and 'intent'.
+        lang (Lang): Language object for mappings.
+        unk (str, optional): Token for unknown words. Defaults to 'unk'.
+    """
     def __init__(self, dataset, lang, unk='unk'):
         self.utterances = []
         self.intents = []
@@ -79,9 +95,29 @@ class IntentsAndSlots (data.Dataset):
     # Auxiliary methods
     
     def mapping_lab(self, data, mapper):
+        """
+        Map labels to indices.
+
+        Args:
+            data (list of str): List of labels.
+            mapper (dict): Dictionary mapping labels to indices.
+
+        Returns:
+            list of int: List of indices corresponding to the labels.
+        """
         return [mapper[x] if x in mapper else mapper[self.unk] for x in data]
     
     def mapping_seq(self, data, mapper): # Map sequences to number
+        """
+        Map sequences of words to indices.
+
+        Args:
+            data (list of str): List of sequences, where each sequence is a string of words.
+            mapper (dict): Dictionary mapping words to indices.
+
+        Returns:
+            list of list of int: List of sequences, where each sequence is a list of indices.
+        """
         res = []
         for seq in data:
             tmp_seq = []
@@ -99,16 +135,30 @@ UTILITY
 """
 
 def load_data(path):
-    '''
-        input: path/to/data
-        output: json 
-    '''
+    """
+    Load data from a JSON file.
+
+    Args:
+        path (str): Path to the JSON file.
+
+    Returns:
+        list of dict: List of samples loaded from the JSON file.
+    """
     dataset = []
     with open(path) as f:
         dataset = json.loads(f.read())
     return dataset
 
 def collate_fn(data):
+    """
+    Custom collate function to merge sequences and pad them.
+
+    Args:
+        data (list of dict): List of samples, where each sample is a dictionary containing 'utterance', 'slots', and 'intent'.
+
+    Returns:
+        dict: Dictionary containing padded 'utterances', 'y_slots', 'intents', and 'slots_len'.
+    """
     def merge(sequences):
         '''
         merge from batch * sent_len to batch * max_len 
@@ -153,7 +203,19 @@ INITIALIZERS
 """
 
 def init_data(args):
+    """
+    Initialize data loaders and language mappings.
 
+    Args:
+        args (argparse.Namespace): Parsed command-line arguments containing batch sizes.
+
+    Returns:
+        tuple: A tuple containing:
+            - Lang: Language object with mappings.
+            - DataLoader: DataLoader for training data.
+            - DataLoader: DataLoader for validation data.
+            - DataLoader: DataLoader for test data.
+    """
     tmp_train_raw = load_data(os.path.join('dataset','ATIS','train.json'))
     portion = 0.10
 

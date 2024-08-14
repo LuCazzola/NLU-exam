@@ -1,0 +1,152 @@
+{
+    "os": "Linux-5.15.0-1066-aws-x86_64-with-glibc2.31",
+    "python": "3.10.10",
+    "heartbeatAt": "2024-08-13T10:12:46.900371",
+    "startedAt": "2024-08-13T10:12:46.582371",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--emb_size",
+        "300",
+        "--hid_size",
+        "300",
+        "--n_layers",
+        "2",
+        "--emb_dropout",
+        "0.1",
+        "--hid_dropout",
+        "0.25",
+        "--out_dropout",
+        "0.1",
+        "--lr",
+        "1",
+        "--n_epochs",
+        "100",
+        "--train_bsize",
+        "64",
+        "--val_bsize",
+        "128",
+        "--test_bsize",
+        "128",
+        "--optimizer_type",
+        "SGD",
+        "--recLayer_type",
+        "LSTM",
+        "--weight_tying",
+        "--var_dropout",
+        "--enable_logger"
+    ],
+    "state": "running",
+    "program": "/teamspace/studios/this_studio/248716_Luca_Cazzola/LM/part_2/main.py",
+    "codePathLocal": "main.py",
+    "codePath": "main.py",
+    "host": "ip-10-192-11-199",
+    "username": "zeus",
+    "executable": "/home/zeus/miniconda3/envs/cloudspace/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2704.242375,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3298.76,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 3517.908,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2649.998,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 548.9473419189453,
+            "used": 45.522850036621094
+        }
+    },
+    "gpu": "NVIDIA L4",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA L4",
+            "memory_total": 24152899584
+        }
+    ],
+    "memory": {
+        "total": 60.46140670776367
+    }
+}

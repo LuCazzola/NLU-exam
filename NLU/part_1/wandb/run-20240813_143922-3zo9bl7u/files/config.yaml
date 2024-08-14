@@ -1,0 +1,85 @@
+wandb_version: 1
+
+learning_rate:
+  desc: null
+  value: 1.0e-05
+embedding_size:
+  desc: null
+  value: 300
+hidden_size:
+  desc: null
+  value: 300
+n_layers:
+  desc: null
+  value: 1
+dataset:
+  desc: null
+  value: ATIS
+optimizer:
+  desc: null
+  value: AdamW
+epochs:
+  desc: null
+  value: 200
+bidirectional:
+  desc: null
+  value: false
+dropout_enable:
+  desc: null
+  value: false
+emb_dropout:
+  desc: null
+  value: 0.1
+hid_dropout:
+  desc: null
+  value: 0.1
+out_dropout:
+  desc: null
+  value: 0.1
+_wandb:
+  desc: null
+  value:
+    python_version: 3.10.10
+    cli_version: 0.17.5
+    framework: huggingface
+    huggingface_version: 4.38.0
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1723559962
+    t:
+      1:
+      - 1
+      - 5
+      - 11
+      - 49
+      - 53
+      - 55
+      - 105
+      2:
+      - 1
+      - 5
+      - 11
+      - 49
+      - 53
+      - 55
+      - 105
+      3:
+      - 2
+      - 16
+      - 23
+      - 61
+      4: 3.10.10
+      5: 0.17.5
+      6: 4.38.0
+      8:
+      - 5
+      13: linux-x86_64
+model_size:
+  desc: null
+  value: 1029156
+trainable_size:
+  desc: null
+  value: 1029156
+run_idx:
+  desc: null
+  value: 3
