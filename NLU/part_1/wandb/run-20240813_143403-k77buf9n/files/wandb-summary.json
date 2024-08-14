@@ -1,1 +1,0 @@
-{"val Slot F1": 0.9532267613972766, "val Intent acc": 0.9819277108433735, "_timestamp": 1723559729.213946, "train loss": 0.052582570165395734, "_runtime": 86.09853100776672, "_step": 200, "mean Slot F1": 0.9068125661842569, "mean Intent accuracy": 0.9372900335946248, "_wandb": {"runtime": 85}}
