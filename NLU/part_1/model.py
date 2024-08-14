@@ -23,11 +23,8 @@ class ModelIAS(nn.Module):
         """
         
         super(ModelIAS, self).__init__()
-        # hid_size = Hidden size
-        # out_slot = number of slots (output size for slot filling)
-        # out_int = number of intents (output size for intent class)
-        # emb_size = word embedding size
-        if not dropout_enable and n_layer == 1 :
+        # Dropout layers are zeroed if flag '--dropout_enabled' is unset (to suppress warnings)
+        if not dropout_enable or n_layer == 1 :
             hid_dropout=0.0
 
         self.embedding = nn.Embedding(vocab_len, emb_size, padding_idx=pad_index)

@@ -30,12 +30,10 @@ class LM_RNN(nn.Module):
         # Token ids to vectors, we will better see this in the next lab 
         self.embedding = nn.Embedding(output_size, emb_size, padding_idx=pad_index)
 
-        # Dropout layers are zeroed if flag '--dropout_enabled' is unset
-        if not dropout_enabled :
-            emb_dropout = 0.0
+        # Dropout layers are zeroed if flag '--dropout_enabled' is unset (to suppress warnings)
+        if not dropout_enabled or n_layers == 1 :
             hid_dropout = 0.0
-            out_dropout = 0.0
-
+            
         if recLayer_type == 'vanilla' :
             # Pytorch's RNN layer: https://pytorch.org/docs/stable/generated/torch.nn.RNN.html
             self.rnn = nn.RNN(emb_size, hidden_size, n_layers, dropout=hid_dropout, bidirectional=False, batch_first=True)
