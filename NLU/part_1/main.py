@@ -58,7 +58,7 @@ if __name__ == "__main__":
     else :
         model, optimizer, criterion_slots, criterion_intents = init_components(args, lang)
         # model inference
-        results_test, intent_test, _, _ = eval_loop(model, test_loader, criterion_slots, criterion_intents, lang)    
+        results_test, intent_test, _ = eval_loop(model, test_loader, criterion_slots, criterion_intents, lang)    
         print(f"slot F1 = {results_test['total']['f']}, intent acc. = {intent_test['accuracy']}")
 
 
