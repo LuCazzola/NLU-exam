@@ -1,21 +1,16 @@
-# Add functions or classes used for data loading and preprocessing
-# Global variables
 import os
 import json
 from pprint import pprint
 import random
 import numpy as np
-# PyTorch imports
 import torch
 import torch.utils.data as data
 from torch.utils.data import DataLoader
-# Utility
 from sklearn.model_selection import train_test_split
 from collections import Counter
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PAD_TOKEN = 0
-os.environ['CUDA_LAUNCH_BLOCKING'] = "1" # Used to report errors on CUDA side
 
 """
 CLASSES
@@ -54,7 +49,7 @@ class Lang():
         if pad:
             vocab['pad'] = PAD_TOKEN
         for elem in elements:
-                vocab[elem] = len(vocab)
+            vocab[elem] = len(vocab)
         return vocab
 
 
@@ -243,8 +238,8 @@ def init_data(args):
 
     words = sum([x['utterance'].split() for x in train_raw], []) # No set() since we want to compute # the cutoff
     corpus = train_raw + val_raw + test_raw # We do not wat unk labels, however this depends on the research purpose
-    slots = set(sum([line['slots'].split() for line in corpus],[]))
-    intents = set([line['intent'] for line in corpus])
+    slots = sorted(list(set(sum([line['slots'].split() for line in corpus], []))))
+    intents = sorted(list(set([line['intent'] for line in corpus])))
     lang = Lang(words, intents, slots, cutoff=0)
 
     # Create our datasets
