@@ -1,1 +1,0 @@
-{"train perplexity": 41.11415607164424, "train loss": 3.7163524921668176, "_timestamp": 1723516149.8911273, "val perplexity": 124.03246547941646, "val loss": 3.7163524921668176, "_runtime": 386.85104632377625, "_step": 26, "AvSGD trigger point": 22, "test perplexity": 119.78304900838738, "_wandb": {"runtime": 386}}
