@@ -1,1 +1,0 @@
-{"[RUN-1] val Slot F1": 0.9709080223332354, "[RUN-1] val Intent acc": 0.9879518072289156, "_timestamp": 1723300581.0352464, "[RUN-1] train loss": 0.055679477698036606, "_runtime": 180.02070426940918, "_step": 10, "_wandb": {"runtime": 262}}

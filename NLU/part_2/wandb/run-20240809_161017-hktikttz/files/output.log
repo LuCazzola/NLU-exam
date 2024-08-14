@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/main.py", line 23, in <module>
-    model, optimizer, criterion_slots, criterion_intents = init_components(args, lang)
-  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/functions.py", line 144, in init_components
-    model = ModelIAS(len(lang.slot2id), len(lang.intent2id), len(lang.word2id),
-  File "/teamspace/studios/this_studio/248716_Luca_Cazzola/NLU/part_2/model.py", line 24, in __init__
-    self.merger = SubtokenMerger(hid_size, num_heads, self.tokenizer).to(DEVICE)
-NameError: name 'DEVICE' is not defined
