@@ -1,21 +1,16 @@
-# Add functions or classes used for data loading and preprocessing
-# Global variables
 import os
 import json
 from pprint import pprint
 import random
 import numpy as np
-# PyTorch imports
 import torch
 import torch.utils.data as data
 from torch.utils.data import DataLoader
-# Utility
 from sklearn.model_selection import train_test_split
 from collections import Counter
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PAD_TOKEN = 0
-os.environ['CUDA_LAUNCH_BLOCKING'] = "1" # Used to report errors on CUDA side
 
 """
 CLASSES
@@ -23,13 +18,13 @@ CLASSES
 
 class Lang():
     """
-    Language class for vocabulary and label mappings.
+    Class to handle language-related mappings for words, slots, and intents.
 
     Args:
-        words (list): List of words in the dataset.
-        intents (list): List of intents in the dataset.
-        slots (list): List of slots in the dataset.
-        cutoff (int, optional): Frequency cutoff for words. Defaults to 0.
+        words (list of str): List of words in the corpus.
+        intents (list of str): List of intent labels.
+        slots (list of str): List of slot labels.
+        cutoff (int, optional): Minimum frequency of words to be included in vocabulary. Defaults to 0.
     """
     def __init__(self, words, intents, slots, cutoff=0):
         self.word2id = self.w2id(words, cutoff=cutoff, unk=True)
@@ -54,20 +49,19 @@ class Lang():
         if pad:
             vocab['pad'] = PAD_TOKEN
         for elem in elements:
-                vocab[elem] = len(vocab)
+            vocab[elem] = len(vocab)
         return vocab
 
 
 class IntentsAndSlots (data.Dataset):
     """
-    Dataset for joint intent-slots learning.
+    Dataset class for handling intent and slot classification tasks.
 
     Args:
-        dataset (list): List of data entries.
-        lang (Lang): Instance of the Lang class for mappings.
-        unk (str, optional): 'Unknown' token. Defaults to 'unk'.
+        dataset (list of dict): List of samples, where each sample is a dictionary containing 'utterance', 'slots', and 'intent'.
+        lang (Lang): Language object for mappings.
+        unk (str, optional): Token for unknown words. Defaults to 'unk'.
     """
-    # Mandatory methods are __init__, __len__ and __getitem__
     def __init__(self, dataset, lang, unk='unk'):
         self.utterances = []
         self.intents = []
@@ -97,27 +91,27 @@ class IntentsAndSlots (data.Dataset):
     
     def mapping_lab(self, data, mapper):
         """
-        Map labels to IDs.
+        Map labels to indices.
 
         Args:
-            data (list): List of labels.
-            mapper (dict): Mapping from labels to IDs.
+            data (list of str): List of labels.
+            mapper (dict): Dictionary mapping labels to indices.
 
         Returns:
-            list: List of IDs corresponding to the labels.
+            list of int: List of indices corresponding to the labels.
         """
         return [mapper[x] if x in mapper else mapper[self.unk] for x in data]
     
     def mapping_seq(self, data, mapper): # Map sequences to number
         """
-        Map sequences of words to IDs.
+        Map sequences of words to indices.
 
         Args:
-            data (list): List of sequences (utterances).
-            mapper (dict): Mapping from words to IDs.
+            data (list of str): List of sequences, where each sequence is a string of words.
+            mapper (dict): Dictionary mapping words to indices.
 
         Returns:
-            list: List of sequences mapped to IDs.
+            list of list of int: List of sequences, where each sequence is a list of indices.
         """
         res = []
         for seq in data:
@@ -143,7 +137,7 @@ def load_data(path):
         path (str): Path to the JSON file.
 
     Returns:
-        list: Loaded dataset.
+        list of dict: List of samples loaded from the JSON file.
     """
     dataset = []
     with open(path) as f:
@@ -152,13 +146,13 @@ def load_data(path):
 
 def collate_fn(data):
     """
-    Collate function for batching data.
+    Custom collate function to merge sequences and pad them.
 
     Args:
-        data (list): List of samples.
+        data (list of dict): List of samples, where each sample is a dictionary containing 'utterance', 'slots', and 'intent'.
 
     Returns:
-        dict: Batches of data with padded sequences and lengths.
+        dict: Dictionary containing padded 'utterances', 'y_slots', 'intents', and 'slots_len'.
     """
     def merge(sequences):
         '''
@@ -205,13 +199,17 @@ INITIALIZERS
 
 def init_data(args):
     """
-    Initialize datasets and dataloaders.
+    Initialize data loaders and language mappings.
 
     Args:
-        args (argparse.Namespace): Command-line arguments.
+        args (argparse.Namespace): Parsed command-line arguments containing batch sizes.
 
     Returns:
-        tuple: Language object, train dataloader, validation dataloader, test dataloader.
+        tuple: A tuple containing:
+            - Lang: Language object with mappings.
+            - DataLoader: DataLoader for training data.
+            - DataLoader: DataLoader for validation data.
+            - DataLoader: DataLoader for test data.
     """
     tmp_train_raw = load_data(os.path.join('dataset','ATIS','train.json'))
     portion = 0.10
@@ -240,8 +238,8 @@ def init_data(args):
 
     words = sum([x['utterance'].split() for x in train_raw], []) # No set() since we want to compute # the cutoff
     corpus = train_raw + val_raw + test_raw # We do not wat unk labels, however this depends on the research purpose
-    slots = set(sum([line['slots'].split() for line in corpus],[]))
-    intents = set([line['intent'] for line in corpus])
+    slots = sorted(list(set(sum([line['slots'].split() for line in corpus], []))))
+    intents = sorted(list(set([line['intent'] for line in corpus])))
     lang = Lang(words, intents, slots, cutoff=0)
 
     # Create our datasets
