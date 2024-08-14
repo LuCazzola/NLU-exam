@@ -389,7 +389,7 @@ def init_logger(args):
     # start a new wandb run to track this script
     wandb.init(
         # set the wandb project where this run will be logged
-        project="NLU-part2",
+        project="NLU-part-2.2",
 
         # track hyperparameters and run metadata
         config={
