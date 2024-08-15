@@ -126,7 +126,7 @@ def read_file(path, eos_token="<eos>"):
 
 
 def collate_fn(data, pad_token):
-     """
+    """
     Custom collate function for padding and batching data.
 
     Args:
