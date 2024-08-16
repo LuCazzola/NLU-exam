@@ -40,6 +40,7 @@ python main.py --emb_size 300 --hid_size 300 --n_layers 1 --emb_dropout 0.1 --hi
 
 ## Test example
 To run inference only on the provided weights :
+
 (best intents)
 ```
 python main.py --emb_size 300 --hid_size 300 --n_layers 1 --emb_dropout 0.1 --hid_dropout 0.1 --out_dropout 0.1 --lr 5 --n_epochs 200 --runs 4 --train_bsize 128 --val_bsize 64 --test_bsize 64 --optimizer_type SGD --dropout_enable --bidirectional --load_checkpoint bin/intents-best_model.pt --test_only
