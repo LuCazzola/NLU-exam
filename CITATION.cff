@@ -1,0 +1,8 @@
+@software{LuCazzola_NLU_repo,
+  author = {Luca Cazzola},
+  title = {NLU exam project},
+  url = {https://github.com/LuCazzola/NLU-exam},
+  version = {1.0},
+  year = {2024}
+  month = {8},
+}
