@@ -26,7 +26,7 @@ TEST_BSIZE=64               # Test set batch size
 # Additional control flow arguments
 LOAD_CHECKPOINT="None"     # Path to weight checkpoint to load (set to "None" if not used)
 TEST_ONLY=false            # (true/false) : Whether to perform inference on test set only or train the model + perform testing
-SAVE_MODEL=true            # (true/false) : Whether to save the model
+SAVE_MODEL=false            # (true/false) : Whether to save the model
 ENABLE_LOGGER=false        # (true/false) : Whether to enable logging to wandb
 
 ### COMMAND COMPOSITION ###
