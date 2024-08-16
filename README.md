@@ -11,6 +11,7 @@ git lfs install
 Then proceed cloning the repository together with the model weights
 ```
 git clone https://github.com/LuCazzola/NLU-exam.git
+cd NLU-exam
 git lfs pull
 ```
 Then install requirements
