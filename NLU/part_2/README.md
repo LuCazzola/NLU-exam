@@ -32,7 +32,7 @@ python main.py --help
 ## Train example
 Training example
 ```
-
+python main.py --bert_version bert-base-uncased --num_heads 4 --int_dropout 0.1 --slot_dropout 0.1 --lr 0.0001 --n_epochs 30 --runs 3 --train_bsize 128 --val_bsize 64 --test_bsize 64 --optimizer_type Adam --momentum 0.9 --finetune_bert --dropout_enable --merger_enable
 ```
 <br>
 
@@ -41,9 +41,9 @@ To run inference only on the provided weights :
 
 (best intents)
 ```
-
+python main.py --bert_version bert-base-uncased --num_heads 4 --int_dropout 0.1 --slot_dropout 0.1 --lr 0.0001 --n_epochs 30 --runs 3 --train_bsize 128 --val_bsize 64 --test_bsize 64 --optimizer_type Adam --momentum 0.9 --finetune_bert --dropout_enable --merger_enable --load_checkpoint bin/intents-best_model.pt --test_only
 ```
 (best slots)
 ```
-
+python main.py --bert_version bert-base-uncased --num_heads 4 --int_dropout 0.1 --slot_dropout 0.1 --lr 0.0001 --n_epochs 30 --runs 3 --train_bsize 128 --val_bsize 64 --test_bsize 64 --optimizer_type Adam --momentum 0.9 --finetune_bert --dropout_enable --load_checkpoint bin/slots-best_model.pt --test_only
 ```
