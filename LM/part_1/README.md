@@ -1,13 +1,38 @@
+# Task description (lab 4, part 1)
+In this, you have to modify the baseline LM_RNN by adding a set of techniques that might improve the performance. In this, you have to add one modification at a time incrementally.
+For each of your experiments, you have to print the performance expressed with Perplexity (PPL).
 
-## Weights download
-Before cloning the repository make sure to have git lfs on you system, otherwise loaded .pt will be unreadable
+* Replace RNN with a Long-Short Term Memory (LSTM) network
+* Add two dropout layers
+  * one after the embedding layer
+  * one before the last linear layer
+* Replace SGD with AdamW
+
+## Note for professors
+Yhe project uses **wandb** as logger to store the metrics.
+If you've already installed the requirements of the [**course labs**](https://github.com/BrownFortress/NLU-2024-Labs), simply install the dependancy for wandb
 ```
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo apt-get install git-lfs
-git lfs install
+pip install wandb
 ```
 
-Then proceed cloning the repository
+# Usage
+## Train model
+
 ```
-git clone https://github.com/LuCazzola/NLU-exam.git
+```
+
+Also a bash script is available to make arguments setting easier :
+```
+chmod +x run.sh
+./run.sh
+```
+
+Otherwise, try :
+```
+python3 main.py ...
+```
+
+## Test best models
+```
+python3 main.py ...
 ```
