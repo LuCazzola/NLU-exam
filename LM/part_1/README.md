@@ -9,15 +9,13 @@ For each of your experiments, you have to print the performance expressed with P
 * Replace SGD with AdamW
 
 ## Note for professors
-Yhe project uses **wandb** as logger to store the metrics.
+The project uses **wandb** as logger to store the metrics.
 If you've already installed the requirements of the [**course labs**](https://github.com/BrownFortress/NLU-2024-Labs), simply install the dependancy for wandb
 ```
 pip install wandb
 ```
 
-<br>
----
-<br>
+<br><hr><br>
 
 # Usage
 
